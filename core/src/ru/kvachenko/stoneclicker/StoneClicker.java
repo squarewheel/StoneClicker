@@ -36,7 +36,7 @@ public class StoneClicker extends Game {
 	@Override
 	public void create () {
         stonesCounter = 0;
-        stonesPerSecond = 1;
+        stonesPerSecond = 0;
         clickPower = 1;
         timeElapsed = 0;
 
@@ -50,8 +50,6 @@ public class StoneClicker extends Game {
             stonesCounter += stonesPerSecond;
             timeElapsed = 0;
         }
-
-        System.out.println(stonesCounter);
 
 		super.render();
 	}

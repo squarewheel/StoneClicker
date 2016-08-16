@@ -22,14 +22,19 @@ package ru.kvachenko.stoneclicker.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import ru.kvachenko.stoneclicker.StoneClicker;
@@ -43,9 +48,13 @@ import ru.kvachenko.stoneclicker.StoneClicker;
 public class GameScreen implements Screen {
     private StoneClicker gameController;
     private TextureAtlas images;
+    private Skin skin;
     private Image stone;
     private Stage mainStage;
     private Stage uiStage;
+    private Label stonesCounterLabel;
+    private Label stonesPerSecondLabel;
+    private Label clickPowerLabel;
     private int screenWidth;
     private int screenHeight;
     private final int stoneMaxWidth;
@@ -54,6 +63,11 @@ public class GameScreen implements Screen {
     public GameScreen(final StoneClicker gameController) {
         this.gameController = gameController;
         images = new TextureAtlas(Gdx.files.internal("android/assets/images.atlas"));
+        skin = new Skin();
+
+        skin.add("default", new BitmapFont(Gdx.files.internal("android/assets/fonts/sansman16.fnt")));
+        skin.add("default", new Label.LabelStyle(skin.getFont("default"), Color.GOLD));
+
         stone = new Image(images.findRegion("stone"));
 
         mainStage = new Stage(new ScreenViewport()){
@@ -64,6 +78,16 @@ public class GameScreen implements Screen {
                 return super.touchDown(screenX, screenY, pointer, button);
             }
         };
+        uiStage = new Stage(new ScreenViewport());
+
+        stonesCounterLabel = new Label("--", skin) {
+            @Override
+            public void act(float delta) {
+                setText("" + gameController.getStonesCounter());
+                super.act(delta);
+            }
+        };
+        stonesCounterLabel.setAlignment(Align.right);
 
         screenWidth = mainStage.getViewport().getScreenWidth();
         screenHeight = mainStage.getViewport().getScreenHeight();
@@ -76,6 +100,14 @@ public class GameScreen implements Screen {
         stone.setPosition(screenWidth/2 - stone.getWidth()/2, screenHeight/2 - stone.getHeight()/2);
         stone.setOrigin(stone.getWidth()/2, stone.getHeight()/2);
         stone.debug();
+
+        Table uiTable = new Table(skin);
+        uiStage.addActor(uiTable);
+        uiTable.setFillParent(true);
+        uiTable.top().pad(5);
+        uiTable.add(new Label("Stones: ", skin)).left();
+        uiTable.add(stonesCounterLabel).left().expandX();
+        uiTable.debug();
 
         Gdx.input.setInputProcessor(new InputMultiplexer(mainStage));
     }
@@ -94,16 +126,19 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         // Update game state
         mainStage.act(delta);
+        uiStage.act(delta);
 
         // Clean screen and draw stages
         Gdx.gl.glClearColor(1, 1, 1, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         mainStage.draw();
+        uiStage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
         mainStage.getViewport().update(width, height, true);
+        uiStage.getViewport().update(width, height, true);
         if (width < height)
             stone.setSize(MathUtils.clamp(width, 240, stoneMaxWidth), MathUtils.clamp(width, 240, stoneMaxWidth));
         else
