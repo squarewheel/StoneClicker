@@ -1,19 +1,33 @@
 
 images.png
-size: 2048,1024
+size: 1024,1024
 format: RGBA8888
 filter: Nearest,Nearest
 repeat: none
-badlogic
+grey_button
   rotate: false
-  xy: 804, 546
-  size: 256, 256
-  orig: 256, 256
+  xy: 2, 40
+  size: 49, 49
+  orig: 49, 49
+  offset: 0, 0
+  index: -1
+grey_button_pressed
+  rotate: false
+  xy: 804, 842
+  size: 49, 49
+  orig: 49, 49
+  offset: 0, 0
+  index: -1
+grey_frame
+  rotate: false
+  xy: 2, 2
+  size: 38, 36
+  orig: 38, 36
   offset: 0, 0
   index: -1
 stone
   rotate: false
-  xy: 2, 2
+  xy: 2, 91
   size: 800, 800
   orig: 800, 800
   offset: 0, 0

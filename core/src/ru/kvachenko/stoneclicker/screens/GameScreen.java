@@ -24,20 +24,21 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import ru.kvachenko.stoneclicker.StoneClicker;
+
+import java.math.BigInteger;
 
 /**
  * @author Sasha Kvachenko
@@ -67,6 +68,20 @@ public class GameScreen implements Screen {
 
         skin.add("default", new BitmapFont(Gdx.files.internal("android/assets/fonts/sansman16.fnt")));
         skin.add("default", new Label.LabelStyle(skin.getFont("default"), Color.GOLD));
+        skin.add("buttonUpImg", new NinePatch(images.findRegion("grey_button"), 10, 10, 10, 10));
+        skin.add("buttonDownImg", new NinePatch(images.findRegion("grey_button_pressed"), 10, 10, 10, 10));
+        skin.add("default", new Button.ButtonStyle(
+                skin.getDrawable("buttonUpImg"),
+                skin.getDrawable("buttonDownImg"),
+                skin.getDrawable("buttonUpImg")));
+        TextButton.TextButtonStyle tbs = new TextButton.TextButtonStyle(
+                skin.getDrawable("buttonUpImg"),
+                skin.getDrawable("buttonDownImg"),
+                skin.getDrawable("buttonUpImg"),
+                skin.getFont("default"));
+        tbs.pressedOffsetY = -4;
+        tbs.fontColor = Color.GOLD;
+        skin.add("default", tbs);
 
         stone = new Image(images.findRegion("stone"));
 
@@ -101,15 +116,25 @@ public class GameScreen implements Screen {
         stone.setOrigin(stone.getWidth()/2, stone.getHeight()/2);
         stone.debug();
 
+        TextButton upgradesButton = new TextButton("Upgrades", skin);
+        upgradesButton.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return false;
+            }
+        });
+
         Table uiTable = new Table(skin);
         uiStage.addActor(uiTable);
         uiTable.setFillParent(true);
         uiTable.top().pad(5);
         uiTable.add(new Label("Stones: ", skin)).left();
         uiTable.add(stonesCounterLabel).left().expandX();
+        uiTable.row().expandY();
+        uiTable.add(upgradesButton).left().bottom();
         uiTable.debug();
 
-        Gdx.input.setInputProcessor(new InputMultiplexer(mainStage));
+        Gdx.input.setInputProcessor(new InputMultiplexer(uiStage, mainStage));
     }
 
     @Override
