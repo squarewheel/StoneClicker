@@ -52,7 +52,9 @@ public class StonesCounter {
         String value = counter.toString();
         int stringLength = value.length();
         int lastCharIndex = 3;
-        int grade = 24;
+        int grade = 27;
+
+        if (stringLength > grade) return "too much";
 
         //if (stringLength > 3) {
             System.out.print("grade: " + stringLength);
