@@ -61,6 +61,9 @@ public class GameScreen implements Screen {
     private final int stoneMaxWidth;
     private final int stoneMaxHeight;
 
+    // Temp variables for debug purposes
+    int ccc = 0;
+
     public GameScreen(final StoneClicker gameController) {
         this.gameController = gameController;
         images = new TextureAtlas(Gdx.files.internal("android/assets/images.atlas"));
@@ -88,7 +91,18 @@ public class GameScreen implements Screen {
         mainStage = new Stage(new ScreenViewport()){
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                stone.addAction(Actions.sequence(Actions.scaleBy(0.05f, 0.05f, 0.05f), Actions.scaleBy(-0.05f, -0.05f, 0.05f)));
+                if (!stone.hasActions())
+                    stone.addAction(Actions.parallel(
+                        Actions.sequence(
+                                Actions.scaleBy(-0.05f, -0.05f, 0.05f),
+                                Actions.scaleBy(0.05f, 0.05f, 0.05f)),
+                        Actions.sequence(
+                                Actions.rotateBy(0.5f, 0.02f),
+                                Actions.delay(0.01f),
+                                Actions.rotateBy(-1f, 0.04f),
+                                Actions.delay(0.01f),
+                                Actions.rotateBy(0.5f, 0.02f))
+                    ));
                 gameController.addStones(gameController.getClickPower());
                 return super.touchDown(screenX, screenY, pointer, button);
             }
