@@ -103,7 +103,7 @@ public class GameScreen implements Screen {
                                 Actions.delay(0.01f),
                                 Actions.rotateBy(0.5f, 0.02f))
                     ));
-                gameController.addStones(gameController.getClickPower());
+                gameController.getStonesCounter().addStones(gameController.getClickPower());
                 return super.touchDown(screenX, screenY, pointer, button);
             }
         };
@@ -112,7 +112,7 @@ public class GameScreen implements Screen {
         stonesCounterLabel = new Label("--", skin) {
             @Override
             public void act(float delta) {
-                setText("" + gameController.getStonesCounter());
+                setText("" + gameController.getStonesCounter().getStones());
                 super.act(delta);
             }
         };

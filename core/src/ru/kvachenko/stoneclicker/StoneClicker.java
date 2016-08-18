@@ -27,17 +27,19 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import ru.kvachenko.stoneclicker.screens.GameScreen;
 
+import java.math.BigInteger;
+
 public class StoneClicker extends Game {
-	private int stonesCounter;
-    private int stonesPerSecond;
-    private int clickPower;
+    private StonesCounter stonesCounter;
+    private BigInteger stonesPerSecond;
+    private BigInteger clickPower;
     private float timeElapsed;
 
 	@Override
 	public void create () {
-        stonesCounter = 0;
-        stonesPerSecond = 0;
-        clickPower = 1;
+        stonesCounter = new StonesCounter();
+        stonesPerSecond = new BigInteger("0");
+        clickPower = new BigInteger("1");
         timeElapsed = 0;
 
 		setScreen(new GameScreen(this));
@@ -47,7 +49,7 @@ public class StoneClicker extends Game {
 	public void render () {
         timeElapsed += Gdx.graphics.getDeltaTime();
         if (timeElapsed >= 1) {
-            stonesCounter += stonesPerSecond;
+            stonesCounter.addStones(stonesPerSecond);
             timeElapsed = 0;
         }
 
@@ -59,19 +61,16 @@ public class StoneClicker extends Game {
 
 	}
 
-    public int getStonesCounter() {
+    public StonesCounter getStonesCounter() {
         return stonesCounter;
     }
 
-    public int getStonesPerSecond() {
+    public BigInteger getStonesPerSecond() {
         return stonesPerSecond;
     }
 
-    public int getClickPower() {
+    public BigInteger getClickPower() {
         return clickPower;
     }
-
-    public void addStones(int quantity) {stonesCounter += quantity; }
-
 
 }
