@@ -30,12 +30,10 @@ import java.util.TreeMap;
  */
 public class StonesCounter {
     private BigInteger counter;
-    //private String[] prefix;
     private TreeMap<Integer, String> prefix;
 
     public StonesCounter() {
         counter = new BigInteger("0");
-        //prefix = new String[]{"k", "M", "G", "T", "P", "E", "Z", "Y"};
         prefix = new TreeMap<Integer, String>();
         prefix.put(24, "Y");
         prefix.put(21, "Z");
@@ -50,47 +48,31 @@ public class StonesCounter {
 
     public String getStones() {
         String value = counter.toString();
-        int stringLength = value.length();
         int lastCharIndex = 3;
         int grade = 27;
 
-        if (stringLength > grade) return "too much";
+        if (value.length() > grade) return "too much";
 
-        //if (stringLength > 3) {
-            System.out.print("grade: " + stringLength);
-            System.out.println(" prefix: " + prefix.lowerEntry(stringLength).getValue());
+        // Debug
+        //System.out.print("grade: " + value.length());
+        //System.out.println(" prefix: " + prefix.lowerEntry(value.length()).getValue());
 
-            for (; grade > 3; grade--) {
-                if (stringLength == grade)
-                    return value.substring(0, lastCharIndex) + "," +
-                            value.charAt(lastCharIndex) +
-                            prefix.lowerEntry(stringLength).getValue();
+        for (; grade > 3; grade--) {
+            if (value.length() == grade)
+                return value.substring(0, lastCharIndex) + "," +
+                        value.charAt(lastCharIndex) +
+                        prefix.lowerEntry(value.length()).getValue();
 
-                lastCharIndex--;
-                if (lastCharIndex <= 0) lastCharIndex = 3;
-            }
-        //}
-//        // Millions
-//        if (counter.toString().length() > 8)
-//            return counter.toString().substring(0, 3) + "," + counter.toString().charAt(3) + "M";
-//        else if (counter.toString().length() > 7)
-//            return counter.toString().substring(0, 2) + "," + counter.toString().charAt(2) + "M";
-//        else if (counter.toString().length() > 6)
-//            return counter.toString().charAt(0) + "," + counter.toString().charAt(1) + "M";
-//
-//        // Thousands
-//        else if (counter.toString().length() > 5)
-//            return counter.toString().substring(0, 3) + "," + counter.toString().charAt(3) + "k";
-//        else if (counter.toString().length() > 4)
-//            return counter.toString().substring(0, 2) + "," + counter.toString().charAt(2) + "k";
-//        else if (counter.toString().length() > 3)
-//            return counter.toString().charAt(0) + "," + counter.toString().charAt(1) + "k";
+            lastCharIndex--;
+            if (lastCharIndex <= 0) lastCharIndex = 3;
+        }
 
-        // Default
         return counter.toString();
     }
 
     public void addStones(BigInteger stones) {
         counter = counter.add(stones);
     }
+
+    public void removeStones(BigInteger stones) { counter = counter.subtract(stones); }
 }

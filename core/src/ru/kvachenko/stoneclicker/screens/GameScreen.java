@@ -24,9 +24,11 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -56,6 +58,10 @@ public class GameScreen implements Screen {
     private Label stonesCounterLabel;
     private Label stonesPerSecondLabel;
     private Label clickPowerLabel;
+    private Table scoresTable;
+    private Button menuButton;
+    private Button upgradesButton;
+    private Window upgradesWindow;
     private int screenWidth;
     private int screenHeight;
     private final int stoneMaxWidth;
@@ -69,14 +75,36 @@ public class GameScreen implements Screen {
         images = new TextureAtlas(Gdx.files.internal("android/assets/images.atlas"));
         skin = new Skin();
 
-        skin.add("default", new BitmapFont(Gdx.files.internal("android/assets/fonts/sansman16.fnt")));
+        skin.add("default", new BitmapFont(Gdx.files.internal("android/assets/fonts/sansman24.fnt")));
+        skin.add("sansman16", new BitmapFont(Gdx.files.internal("android/assets/fonts/sansman16.fnt")));
         skin.add("default", new Label.LabelStyle(skin.getFont("default"), Color.GOLD));
         skin.add("buttonUpImg", new NinePatch(images.findRegion("grey_button"), 10, 10, 10, 10));
         skin.add("buttonDownImg", new NinePatch(images.findRegion("grey_button_pressed"), 10, 10, 10, 10));
+        skin.add("windowImg", new NinePatch(images.findRegion("grey_box"), 8, 8, 8, 8));
+        skin.add("sliderImg", new NinePatch(images.findRegion("grey_slidebar"), 5, 5, 5, 5));
+        skin.add("knobImg", new TextureRegion(images.findRegion("gray_slider")));
+        skin.add("closeWindowImg", new TextureRegion(images.findRegion("red_cross_small")));
+        skin.add("menuButtonGreen", new TextureRegion(images.findRegion("green_menu_button")));
+        skin.add("menuButtonGray", new TextureRegion(images.findRegion("gray_menu_button")));
+        skin.add("plusButtonGreen", new TextureRegion(images.findRegion("green_plus_button")));
+        skin.add("plusButtonGray", new TextureRegion(images.findRegion("gray_plus_button")));
+        skin.add("default", new Window.WindowStyle(skin.getFont("sansman16"), Color.GOLD, skin.getDrawable("windowImg")));
         skin.add("default", new Button.ButtonStyle(
                 skin.getDrawable("buttonUpImg"),
                 skin.getDrawable("buttonDownImg"),
                 skin.getDrawable("buttonUpImg")));
+        skin.add("closeWindowButton", new Button.ButtonStyle(
+                skin.getDrawable("closeWindowImg"),
+                skin.getDrawable("closeWindowImg"),
+                skin.getDrawable("closeWindowImg")));
+        skin.add("menuButtonStyle", new Button.ButtonStyle(
+                skin.getDrawable("menuButtonGray"),
+                skin.getDrawable("menuButtonGreen"),
+                skin.getDrawable("menuButtonGray")));
+        skin.add("plusButtonStyle", new Button.ButtonStyle(
+                skin.getDrawable("plusButtonGray"),
+                skin.getDrawable("plusButtonGreen"),
+                skin.getDrawable("plusButtonGray")));
         TextButton.TextButtonStyle tbs = new TextButton.TextButtonStyle(
                 skin.getDrawable("buttonUpImg"),
                 skin.getDrawable("buttonDownImg"),
@@ -84,6 +112,10 @@ public class GameScreen implements Screen {
                 skin.getFont("default"));
         tbs.pressedOffsetY = -4;
         tbs.fontColor = Color.GOLD;
+        ScrollPane.ScrollPaneStyle sps = new ScrollPane.ScrollPaneStyle();
+        sps.vScroll = skin.getDrawable("sliderImg");
+        sps.vScrollKnob = skin.getDrawable("knobImg");
+        skin.add("default", sps);
         skin.add("default", tbs);
 
         stone = new Image(images.findRegion("stone"));
@@ -91,7 +123,7 @@ public class GameScreen implements Screen {
         mainStage = new Stage(new ScreenViewport()){
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                if (!stone.hasActions())
+                if (!stone.hasActions())    // Click animation
                     stone.addAction(Actions.parallel(
                         Actions.sequence(
                                 Actions.scaleBy(-0.05f, -0.05f, 0.05f),
@@ -103,6 +135,8 @@ public class GameScreen implements Screen {
                                 Actions.delay(0.01f),
                                 Actions.rotateBy(0.5f, 0.02f))
                     ));
+
+                // Each click adds stones
                 gameController.getStonesCounter().addStones(gameController.getClickPower());
                 return super.touchDown(screenX, screenY, pointer, button);
             }
@@ -116,7 +150,22 @@ public class GameScreen implements Screen {
                 super.act(delta);
             }
         };
-        stonesCounterLabel.setAlignment(Align.right);
+
+        stonesPerSecondLabel = new Label("--", skin) {
+            @Override
+            public void act(float delta) {
+                setText("" + gameController.getStonesPerSecond());
+                super.act(delta);
+            }
+        };
+
+        clickPowerLabel = new Label("--", skin) {
+            @Override
+            public void act(float delta) {
+                setText("" + gameController.getClickPower());
+                super.act(delta);
+            }
+        };
 
         screenWidth = mainStage.getViewport().getScreenWidth();
         screenHeight = mainStage.getViewport().getScreenHeight();
@@ -128,25 +177,104 @@ public class GameScreen implements Screen {
         mainStage.addActor(stone);
         stone.setPosition(screenWidth/2 - stone.getWidth()/2, screenHeight/2 - stone.getHeight()/2);
         stone.setOrigin(stone.getWidth()/2, stone.getHeight()/2);
-        stone.debug();
+        //stone.debug();
 
-        TextButton upgradesButton = new TextButton("Upgrades", skin);
-        upgradesButton.addListener(new InputListener() {
+        Button closeWindowButton = new Button(skin, "closeWindowButton");
+        menuButton = new Button(skin, "menuButtonStyle");
+        upgradesButton = new Button(skin, "plusButtonStyle");
+
+        Table upgradesTable = new Table(skin);
+        //upgradesTable.setFillParent(true);
+        upgradesTable.top().padRight(40);
+        upgradesTable.add(new TextButton("upgrade 1", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
+        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX();
+        upgradesTable.debug();
+
+        ScrollPane upgradesScrollPane = new ScrollPane(upgradesTable, skin);
+        upgradesScrollPane.setVariableSizeKnobs(false);
+        upgradesScrollPane.setFadeScrollBars(false);
+        //upgradesScrollPane.setClamp(true);
+        //upgradesScrollPane.setFillParent(true);
+
+        upgradesButton.addListener(new InputListener(){
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                return false;
+                upgradesWindow.setVisible(true);
+                upgradesWindow.toFront();
+                return super.touchDown(event, x, y, pointer, button);
             }
         });
 
-        Table uiTable = new Table(skin);
-        uiStage.addActor(uiTable);
-        uiTable.setFillParent(true);
-        uiTable.top().pad(5);
-        uiTable.add(new Label("Stones: ", skin)).left();
-        uiTable.add(stonesCounterLabel).left().expandX();
-        uiTable.row().expandY();
-        uiTable.add(upgradesButton).left().bottom();
-        uiTable.debug();
+        scoresTable = new Table(skin);
+        scoresTable.setFillParent(true);
+        scoresTable.top().left().pad(5, 5, 5, 0);
+        scoresTable.add(new Label("Stones: ", skin)).right();
+        scoresTable.add(stonesCounterLabel).left();
+        scoresTable.row();
+        scoresTable.add(new Label("Power: ", skin)).right();
+        scoresTable.add(clickPowerLabel).left();
+        scoresTable.row();
+        scoresTable.add(new Label("SPS: ", skin)).right();
+        scoresTable.add(stonesPerSecondLabel).left();
+        uiStage.addActor(scoresTable);
+        scoresTable.debug();
+
+        Table buttonsTable = new Table(skin);
+        buttonsTable.setFillParent(true);
+        buttonsTable.top().right().pad(5, 0, 5, 5);
+        buttonsTable.add(menuButton).top().right();
+        buttonsTable.row();
+        buttonsTable.add(upgradesButton);
+        uiStage.addActor(buttonsTable);
+        //buttonsTable.debug();
+
+        upgradesWindow = new Window("Upgrades", skin);
+        upgradesWindow.setVisible(false);
+        //upgradesWindow.debug();
+        upgradesWindow.setX(5);
+        //upgradesWindow.setFillParent(true);
+        upgradesWindow.padLeft(5).padRight(5).padBottom(5);
+        //upgradesWindow.bottom();
+        upgradesWindow.padTop(20);
+        upgradesWindow.getTitleTable().add(closeWindowButton);
+        upgradesWindow.add(upgradesScrollPane).left().padTop(5).expandX().fillX();
+        uiStage.addActor(upgradesWindow);
+
+        closeWindowButton.addListener(new InputListener(){
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                System.out.println("click");
+                upgradesWindow.setVisible(false);
+                super.touchUp(event, x, y, pointer, button);
+            }
+        });
 
         Gdx.input.setInputProcessor(new InputMultiplexer(uiStage, mainStage));
     }
@@ -186,6 +314,8 @@ public class GameScreen implements Screen {
         screenWidth = mainStage.getViewport().getScreenWidth();
         screenHeight = mainStage.getViewport().getScreenHeight();
         stone.setPosition((float) screenWidth/2 - stone.getWidth()/2, (float) screenHeight/2 - stone.getHeight()/2);
+        upgradesWindow.setSize(screenWidth, screenHeight - (menuButton.getHeight() + upgradesButton.getHeight() + 20));
+        upgradesWindow.setX(5);
     }
 
     @Override
