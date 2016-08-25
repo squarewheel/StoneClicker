@@ -36,6 +36,12 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import ru.kvachenko.stoneclicker.StoneClicker;
+import ru.kvachenko.stoneclicker.StonesCounter;
+import ru.kvachenko.stoneclicker.Upgrade;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Sasha Kvachenko
@@ -44,6 +50,107 @@ import ru.kvachenko.stoneclicker.StoneClicker;
  *         Main game screen.
  */
 public class GameScreen implements Screen {
+    private class UpgradeWidget extends Table {
+        Upgrade upgrade;
+//        Label nameLabel;
+//        Label costLabel;
+//        Label descriptionLabel;
+//        Label bonusesLabel;
+        ArrayList<Label> labelsList;
+
+        UpgradeWidget(Upgrade u) {
+            super();
+            upgrade = u;
+
+            labelsList = new ArrayList<Label>();
+
+            Label nameLabel = new Label("Upgrade...", skin);
+            Label costLabel = new Label("", skin) {
+                @Override
+                public void act(float delta) {
+                    setText("Cost:\n" + StonesCounter.shortedValueOf(upgrade.getCost()));
+                    super.act(delta);
+                }
+            };
+            Label descriptionLabel = new Label("Lorem ipsum dolor sit amet.", skin, "upgradeLabel");
+            descriptionLabel.setWrap(true);
+            Label bonusesLabel = new Label("", skin, "upgradeLabel") {
+                @Override
+                public void act(float delta) {
+                    setText("Power: " + StonesCounter.shortedValueOf(upgrade.getPowerBonus()) +
+                     " SPS: " + StonesCounter.shortedValueOf(upgrade.getSPSBonus()));
+                    super.act(delta);
+                }
+            };
+
+            labelsList.add(nameLabel);
+            labelsList.add(costLabel);
+            labelsList.add(descriptionLabel);
+            labelsList.add(bonusesLabel);
+
+            Button buy = new Button(skin, "plusButtonStyle");
+            Button sell = new Button(skin, "minusButtonStyle");
+
+            buy.addListener(new InputListener(){
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    return true;
+                }
+
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                    upgrade.buy(gameController);
+                }
+            });
+            sell.addListener(new InputListener(){
+                @Override
+                public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                    return true;
+                }
+
+                @Override
+                public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                    upgrade.sell(gameController);
+                }
+            });
+
+            //Table upgradeInfoTable = new Table();
+            HorizontalGroup buttonsGroup = new HorizontalGroup();
+            //buttonsGroup.setFillParent(true);
+            buttonsGroup.addActor(buy);
+            buttonsGroup.addActor(sell);
+
+            this.background(skin.getDrawable("windowImg"));
+            //this.setFillParent(true);
+            this.pad(1);
+            this.add(nameLabel).colspan(2).top().left().padLeft(4);
+            this.row().expandY();
+            this.add(bonusesLabel).top().left().padLeft(4);
+            this.row();
+            this.add(descriptionLabel).colspan(2).bottom().left().padLeft(4);
+            this.row();
+            this.add(costLabel).right().expandX().padLeft(4);
+            this.add(buttonsGroup).bottom().right();
+
+            //this.setFillParent(true);
+            //this.add(this).left();
+            //this.add(buttonsGroup).right();
+        }
+
+        @Override
+        public void act(float delta) {
+            if (gameController.getScore().getCounter().compareTo(upgrade.getCost()) < 0) {
+                //for (Label l: labelsList)
+                    this.addAction(Actions.alpha(0.2f));
+            }
+            else {
+                //for (Label l: labelsList)
+                    this.addAction(Actions.alpha(1f));
+            }
+            super.act(delta);
+        }
+    }
+
     private StoneClicker gameController;
     private TextureAtlas images;
     private Skin skin;
@@ -59,8 +166,8 @@ public class GameScreen implements Screen {
     private Window upgradesWindow;
     private int screenWidth;
     private int screenHeight;
-    private final int stoneMaxWidth;
-    private final int stoneMaxHeight;
+    private int stoneMaxWidth;
+    private int stoneMaxHeight;
 
     // Temp variables for debug purposes
     int ccc = 0;
@@ -73,6 +180,7 @@ public class GameScreen implements Screen {
         skin.add("default", new BitmapFont(Gdx.files.internal("android/assets/fonts/sansman24.fnt")));
         skin.add("sansman16", new BitmapFont(Gdx.files.internal("android/assets/fonts/sansman16.fnt")));
         skin.add("default", new Label.LabelStyle(skin.getFont("default"), Color.GOLD));
+        skin.add("upgradeLabel", new Label.LabelStyle(skin.getFont("sansman16"), Color.GOLD));
         skin.add("buttonUpImg", new NinePatch(images.findRegion("grey_button"), 10, 10, 10, 10));
         skin.add("buttonDownImg", new NinePatch(images.findRegion("grey_button_pressed"), 10, 10, 10, 10));
         skin.add("windowImg", new NinePatch(images.findRegion("grey_box"), 8, 8, 8, 8));
@@ -83,6 +191,8 @@ public class GameScreen implements Screen {
         skin.add("menuButtonGray", new TextureRegion(images.findRegion("gray_menu_button")));
         skin.add("plusButtonGreen", new TextureRegion(images.findRegion("green_plus_button")));
         skin.add("plusButtonGray", new TextureRegion(images.findRegion("gray_plus_button")));
+        skin.add("minusButtonGreen", new TextureRegion(images.findRegion("green_minus_button")));
+        skin.add("minusButtonGray", new TextureRegion(images.findRegion("gray_minus_button")));
         skin.add("default", new Window.WindowStyle(skin.getFont("sansman16"), Color.GOLD, skin.getDrawable("windowImg")));
         skin.add("default", new Button.ButtonStyle(
                 skin.getDrawable("buttonUpImg"),
@@ -100,6 +210,10 @@ public class GameScreen implements Screen {
                 skin.getDrawable("plusButtonGray"),
                 skin.getDrawable("plusButtonGreen"),
                 skin.getDrawable("plusButtonGray")));
+        skin.add("minusButtonStyle", new Button.ButtonStyle(
+                skin.getDrawable("minusButtonGray"),
+                skin.getDrawable("minusButtonGreen"),
+                skin.getDrawable("minusButtonGray")));
         TextButton.TextButtonStyle tbs = new TextButton.TextButtonStyle(
                 skin.getDrawable("buttonUpImg"),
                 skin.getDrawable("buttonDownImg"),
@@ -181,30 +295,14 @@ public class GameScreen implements Screen {
         Table upgradesTable = new Table(skin);
         //upgradesTable.setFillParent(true);
         upgradesTable.top().padRight(40);
-        upgradesTable.add(new TextButton("upgrade 1", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 3", skin)).left().expandX().fillX(); upgradesTable.row();
-        upgradesTable.add(new TextButton("upgrade 2", skin)).left().expandX().fillX();
+        for (int i = 1; i <= 10; i++) {
+            BigDecimal baseCost = new BigDecimal(MathUtils.random(1, 100));
+            BigDecimal powerBonus = new BigDecimal(MathUtils.random(1, 10));
+            BigDecimal spsBonus = new BigDecimal(MathUtils.random(1, 5));
+            UpgradeWidget upgradeWidget = new UpgradeWidget(new Upgrade(baseCost, powerBonus, spsBonus));
+
+            upgradesTable.add(upgradeWidget).left().expandX().fillX(); upgradesTable.row();
+        }
         upgradesTable.debug();
 
         ScrollPane upgradesScrollPane = new ScrollPane(upgradesTable, skin);

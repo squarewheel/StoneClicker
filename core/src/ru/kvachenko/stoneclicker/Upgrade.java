@@ -39,6 +39,11 @@ public class Upgrade {
     public Upgrade() {
     }
 
+    /**
+     * @param c BaseCost
+     * @param pb ClickPower bonus
+     * @param sb SPS Bonus
+     * */
     public Upgrade(BigDecimal c, BigDecimal pb, BigDecimal sb) {
         baseCost = c;
         currentCost = c;
