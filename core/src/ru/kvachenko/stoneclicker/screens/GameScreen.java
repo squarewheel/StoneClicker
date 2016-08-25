@@ -24,29 +24,24 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import ru.kvachenko.stoneclicker.StoneClicker;
-
-import java.math.BigInteger;
 
 /**
  * @author Sasha Kvachenko
  *         Created on 15.08.2016.
  *         <p>
- *         File description.
+ *         Main game screen.
  */
 public class GameScreen implements Screen {
     private StoneClicker gameController;
@@ -137,7 +132,7 @@ public class GameScreen implements Screen {
                     ));
 
                 // Each click adds stones
-                gameController.getStonesCounter().addStones(gameController.getClickPower());
+                gameController.getScore().addStones(gameController.getClickPower().getCounter());
                 return super.touchDown(screenX, screenY, pointer, button);
             }
         };
@@ -146,7 +141,7 @@ public class GameScreen implements Screen {
         stonesCounterLabel = new Label("--", skin) {
             @Override
             public void act(float delta) {
-                setText("" + gameController.getStonesCounter().getStones());
+                setText(gameController.getScore().getStones());
                 super.act(delta);
             }
         };
@@ -154,7 +149,7 @@ public class GameScreen implements Screen {
         stonesPerSecondLabel = new Label("--", skin) {
             @Override
             public void act(float delta) {
-                setText("" + gameController.getStonesPerSecond());
+                setText(gameController.getStonesPerSecond().getStones());
                 super.act(delta);
             }
         };
@@ -162,7 +157,7 @@ public class GameScreen implements Screen {
         clickPowerLabel = new Label("--", skin) {
             @Override
             public void act(float delta) {
-                setText("" + gameController.getClickPower());
+                setText(gameController.getClickPower().getStones());
                 super.act(delta);
             }
         };
@@ -270,7 +265,6 @@ public class GameScreen implements Screen {
 
             @Override
             public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
-                System.out.println("click");
                 upgradesWindow.setVisible(false);
                 super.touchUp(event, x, y, pointer, button);
             }

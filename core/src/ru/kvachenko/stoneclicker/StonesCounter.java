@@ -19,6 +19,7 @@
 
 package ru.kvachenko.stoneclicker;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.TreeMap;
 
@@ -29,11 +30,10 @@ import java.util.TreeMap;
  *         Class for store and representation big int values.
  */
 public class StonesCounter {
-    private BigInteger counter;
-    private TreeMap<Integer, String> prefix;
+    private static TreeMap<Integer, String> prefix;
+    private BigDecimal counter;
 
-    public StonesCounter() {
-        counter = new BigInteger("0");
+    static {
         prefix = new TreeMap<Integer, String>();
         prefix.put(24, "Y");
         prefix.put(21, "Z");
@@ -46,10 +46,25 @@ public class StonesCounter {
         prefix.put(0, "");
     }
 
-    public String getStones() {
-        String value = counter.toString();
-        int lastCharIndex = 3;
-        int grade = 27;
+    public StonesCounter(int initialValue) {
+        counter = new BigDecimal(initialValue);
+    }
+
+    public StonesCounter() {
+        counter = new BigDecimal("0");
+    }
+
+    /**
+     *  Return shorted value of given number. E.g. 10000 will be presented as 10k.
+     *  If number less than thee chars return number as is, otherwise return truncated value.
+     *
+     *  @param num BigDecimal number.
+     *  @return shorted value as string.
+     */
+    public static String shortedValueOf(BigDecimal num) {
+        String value = num.toBigInteger().toString();
+        int lastCharIndex = 3;                          // Print up to three characters
+        int grade = prefix.lastKey() + lastCharIndex;   // Maximum possible to print grade of number
 
         if (value.length() > grade) return "too much";
 
@@ -59,7 +74,7 @@ public class StonesCounter {
 
         for (; grade > 3; grade--) {
             if (value.length() == grade)
-                return value.substring(0, lastCharIndex) + "," +
+                value = value.substring(0, lastCharIndex) + "," +
                         value.charAt(lastCharIndex) +
                         prefix.lowerEntry(value.length()).getValue();
 
@@ -67,12 +82,31 @@ public class StonesCounter {
             if (lastCharIndex <= 0) lastCharIndex = 3;
         }
 
-        return counter.toString();
+        return value;
     }
 
-    public void addStones(BigInteger stones) {
+    public BigDecimal getCounter() {
+        return counter;
+    }
+
+    /**
+     * @return current value of stones counter as string.
+     */
+    public String getStones() {
+        return shortedValueOf(counter);
+    }
+
+    public void addStones(BigDecimal stones) {
         counter = counter.add(stones);
     }
 
-    public void removeStones(BigInteger stones) { counter = counter.subtract(stones); }
+    public void removeStones(BigDecimal stones) { counter = counter.subtract(stones); }
+
+    /**
+     * Compare given value and counter value.
+     *
+     * @param val BigDecimal number to compare with counter.
+     * @return -1, 0, or 1 as this BigDecimal is numerically less than, equal to, or greater than val.
+     */
+    //public int compareTo(BigDecimal val) { return counter.compareTo(val); }
 }

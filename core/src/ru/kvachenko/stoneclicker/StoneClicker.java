@@ -19,27 +19,21 @@
 
 package ru.kvachenko.stoneclicker;
 
-import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import ru.kvachenko.stoneclicker.screens.GameScreen;
 
-import java.math.BigInteger;
-
 public class StoneClicker extends Game {
-    private StonesCounter stonesCounter;
-    private BigInteger stonesPerSecond;
-    private BigInteger clickPower;
+    private StonesCounter score;
+    private StonesCounter stonesPerSecond;
+    private StonesCounter clickPower;
     private float timeElapsed;
 
 	@Override
 	public void create () {
-        stonesCounter = new StonesCounter();
-        stonesPerSecond = new BigInteger("0");
-        clickPower = new BigInteger("1");
+        score = new StonesCounter();
+        stonesPerSecond = new StonesCounter();
+        clickPower = new StonesCounter(1);
         timeElapsed = 0;
 
 		setScreen(new GameScreen(this));
@@ -49,7 +43,7 @@ public class StoneClicker extends Game {
 	public void render () {
         timeElapsed += Gdx.graphics.getDeltaTime();
         if (timeElapsed >= 1) {
-            stonesCounter.addStones(stonesPerSecond);
+            score.addStones(stonesPerSecond.getCounter());
             timeElapsed = 0;
         }
 
@@ -61,16 +55,36 @@ public class StoneClicker extends Game {
 
 	}
 
-    public StonesCounter getStonesCounter() {
-        return stonesCounter;
+    public StonesCounter getScore() {
+        return score;
     }
 
-    public BigInteger getStonesPerSecond() {
+    public StonesCounter getStonesPerSecond() {
         return stonesPerSecond;
     }
 
-    public BigInteger getClickPower() {
+    public StonesCounter getClickPower() {
         return clickPower;
     }
+
+/*
+
+    public void addStonesPerSecond(BigDecimal val) {
+        stonesPerSecond = stonesPerSecond.add(val);
+    }
+
+    public void addClickPower(BigDecimal val) {
+        clickPower = clickPower.add(val);
+    }
+
+    public void removeStonesPerSecond(BigDecimal val) {
+        stonesPerSecond = stonesPerSecond.subtract(val);
+    }
+
+    public void removeClickPower(BigDecimal val) {
+        clickPower = clickPower.subtract(val);
+    }
+*/
+
 
 }
