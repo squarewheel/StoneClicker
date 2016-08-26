@@ -40,8 +40,6 @@ import ru.kvachenko.stoneclicker.StonesCounter;
 import ru.kvachenko.stoneclicker.Upgrade;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Sasha Kvachenko
@@ -52,19 +50,21 @@ import java.util.List;
 public class GameScreen implements Screen {
     private class UpgradeWidget extends Table {
         Upgrade upgrade;
-//        Label nameLabel;
-//        Label costLabel;
-//        Label descriptionLabel;
-//        Label bonusesLabel;
-        ArrayList<Label> labelsList;
+        Button buyButton;
+        Button sellButton;
 
         UpgradeWidget(Upgrade u) {
             super();
             upgrade = u;
 
-            labelsList = new ArrayList<Label>();
-
             Label nameLabel = new Label("Upgrade...", skin);
+            Label amountLabel = new Label("x0", skin) {
+                @Override
+                public void act(float delta) {
+                    setText("x" + upgrade.getAmount());
+                    super.act(delta);
+                }
+            };
             Label costLabel = new Label("", skin) {
                 @Override
                 public void act(float delta) {
@@ -72,8 +72,8 @@ public class GameScreen implements Screen {
                     super.act(delta);
                 }
             };
-            Label descriptionLabel = new Label("Lorem ipsum dolor sit amet.", skin, "upgradeLabel");
-            descriptionLabel.setWrap(true);
+            //Label descriptionLabel = new Label("Lorem ipsum dolor sit amet.", skin, "upgradeLabel");
+            //descriptionLabel.setWrap(true);
             Label bonusesLabel = new Label("", skin, "upgradeLabel") {
                 @Override
                 public void act(float delta) {
@@ -83,15 +83,10 @@ public class GameScreen implements Screen {
                 }
             };
 
-            labelsList.add(nameLabel);
-            labelsList.add(costLabel);
-            labelsList.add(descriptionLabel);
-            labelsList.add(bonusesLabel);
+            buyButton = new Button(skin, "plusButtonStyle");
+            sellButton = new Button(skin, "minusButtonStyle");
 
-            Button buy = new Button(skin, "plusButtonStyle");
-            Button sell = new Button(skin, "minusButtonStyle");
-
-            buy.addListener(new InputListener(){
+            buyButton.addListener(new InputListener(){
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                     return true;
@@ -102,7 +97,7 @@ public class GameScreen implements Screen {
                     upgrade.buy(gameController);
                 }
             });
-            sell.addListener(new InputListener(){
+            sellButton.addListener(new InputListener(){
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                     return true;
@@ -114,38 +109,38 @@ public class GameScreen implements Screen {
                 }
             });
 
-            //Table upgradeInfoTable = new Table();
             HorizontalGroup buttonsGroup = new HorizontalGroup();
-            //buttonsGroup.setFillParent(true);
-            buttonsGroup.addActor(buy);
-            buttonsGroup.addActor(sell);
+            buttonsGroup.addActor(costLabel);
+            buttonsGroup.addActor(buyButton);
+            buttonsGroup.addActor(sellButton);
 
             this.background(skin.getDrawable("windowImg"));
-            //this.setFillParent(true);
-            this.pad(1);
-            this.add(nameLabel).colspan(2).top().left().padLeft(4);
+            this.pad(1, 4, 1, 1);
+            this.add(nameLabel).top().left().expandX();
+            this.add(amountLabel).top().right();
             this.row().expandY();
-            this.add(bonusesLabel).top().left().padLeft(4);
+            this.add(bonusesLabel).top().left();
             this.row();
-            this.add(descriptionLabel).colspan(2).bottom().left().padLeft(4);
-            this.row();
-            this.add(costLabel).right().expandX().padLeft(4);
-            this.add(buttonsGroup).bottom().right();
+            this.add(buttonsGroup).colspan(2).expandX().bottom().right();
+            this.debug();
 
-            //this.setFillParent(true);
-            //this.add(this).left();
-            //this.add(buttonsGroup).right();
         }
 
         @Override
         public void act(float delta) {
             if (gameController.getScore().getCounter().compareTo(upgrade.getCost()) < 0) {
-                //for (Label l: labelsList)
+                if (upgrade.getAmount() < 1)
                     this.addAction(Actions.alpha(0.2f));
+                else {
+                    this.addAction(Actions.alpha(0.8f));
+                    buyButton.addAction(Actions.alpha(0.2f));
+                    sellButton.addAction(Actions.alpha(1f));
+                }
             }
             else {
-                //for (Label l: labelsList)
-                    this.addAction(Actions.alpha(1f));
+                this.addAction(Actions.alpha(1f));
+                buyButton.addAction(Actions.alpha(1f));
+                this.addAction(Actions.alpha(1f));
             }
             super.act(delta);
         }
@@ -259,7 +254,6 @@ public class GameScreen implements Screen {
                 super.act(delta);
             }
         };
-
         stonesPerSecondLabel = new Label("--", skin) {
             @Override
             public void act(float delta) {
@@ -267,7 +261,6 @@ public class GameScreen implements Screen {
                 super.act(delta);
             }
         };
-
         clickPowerLabel = new Label("--", skin) {
             @Override
             public void act(float delta) {
@@ -294,7 +287,7 @@ public class GameScreen implements Screen {
 
         Table upgradesTable = new Table(skin);
         //upgradesTable.setFillParent(true);
-        upgradesTable.top().padRight(40);
+        upgradesTable.top();
         for (int i = 1; i <= 10; i++) {
             BigDecimal baseCost = new BigDecimal(MathUtils.random(1, 100));
             BigDecimal powerBonus = new BigDecimal(MathUtils.random(1, 10));
@@ -303,13 +296,11 @@ public class GameScreen implements Screen {
 
             upgradesTable.add(upgradeWidget).left().expandX().fillX(); upgradesTable.row();
         }
-        upgradesTable.debug();
+        //upgradesTable.debug();
 
         ScrollPane upgradesScrollPane = new ScrollPane(upgradesTable, skin);
         upgradesScrollPane.setVariableSizeKnobs(false);
         upgradesScrollPane.setFadeScrollBars(false);
-        //upgradesScrollPane.setClamp(true);
-        //upgradesScrollPane.setFillParent(true);
 
         upgradesButton.addListener(new InputListener(){
             @Override
@@ -347,9 +338,7 @@ public class GameScreen implements Screen {
         upgradesWindow.setVisible(false);
         //upgradesWindow.debug();
         upgradesWindow.setX(5);
-        //upgradesWindow.setFillParent(true);
         upgradesWindow.padLeft(5).padRight(5).padBottom(5);
-        //upgradesWindow.bottom();
         upgradesWindow.padTop(20);
         upgradesWindow.getTitleTable().add(closeWindowButton);
         upgradesWindow.add(upgradesScrollPane).left().padTop(5).expandX().fillX();
