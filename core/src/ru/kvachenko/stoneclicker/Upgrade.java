@@ -25,10 +25,9 @@ import java.math.BigDecimal;
  * @author Sasha Kvachenko
  *         Created on 22.08.2016.
  *         <p>
- *         File description.
+ *         Upgrades buying for get stones without clicks and for incrase click power.
  */
 public class Upgrade {
-    //private static StoneClicker gameController;
     private static final BigDecimal costMultiplier = new BigDecimal("1.15");
     private BigDecimal baseCost;        // Base cost of this upgrade
     private BigDecimal currentCost;     // Cost of current tier of upgrade
@@ -36,19 +35,14 @@ public class Upgrade {
     private BigDecimal SPSBonus;        // Bonus to stones per second
     private int amount;                 // Amount of buying upgrades of this type
 
-    public Upgrade() {
-    }
+    //public Upgrade() {
+    //}
 
-    /**
-     * @param c BaseCost
-     * @param pb ClickPower bonus
-     * @param sb SPS Bonus
-     * */
-    public Upgrade(BigDecimal c, BigDecimal pb, BigDecimal sb) {
-        baseCost = c;
-        currentCost = c;
-        powerBonus = pb;
-        SPSBonus = sb;
+    public Upgrade(BigDecimal baseCost, BigDecimal clickPowerBonus, BigDecimal stonesPerSecondBonus) {
+        this.baseCost = baseCost;
+        currentCost = baseCost;
+        powerBonus = clickPowerBonus;
+        SPSBonus = stonesPerSecondBonus;
         amount = 0;
     }
 
@@ -87,7 +81,6 @@ public class Upgrade {
         gameController.getStonesPerSecond().removeStones(SPSBonus);
         amount--;
 
-        //currentCost = baseCost.multiply(costMultiplier.multiply(new BigDecimal(amount + 1)));
         currentCost = moneyback;
     }
 }

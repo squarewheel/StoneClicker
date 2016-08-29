@@ -24,6 +24,7 @@ import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker;
 import com.badlogic.gdx.tools.texturepacker.TexturePacker.Settings;
 import ru.kvachenko.stoneclicker.StoneClicker;
+import ru.kvachenko.stoneclicker.database.DesktopDB;
 
 public class DesktopLauncher {
 	public static void main (String[] arg) {
@@ -38,6 +39,6 @@ public class DesktopLauncher {
 		config.title = "Stone Clicker";
         config.width = 320;
         config.height = 480;
-		new LwjglApplication(new StoneClicker(), config);
+		new LwjglApplication(new StoneClicker(new DesktopDB("stoneclicker")), config);
 	}
 }

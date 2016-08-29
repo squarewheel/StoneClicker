@@ -73,6 +73,7 @@ project(":core") {
     dependencies {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+        compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
     }
 }
 

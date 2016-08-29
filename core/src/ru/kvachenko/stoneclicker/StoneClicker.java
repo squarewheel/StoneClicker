@@ -21,20 +21,35 @@ package ru.kvachenko.stoneclicker;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import ru.kvachenko.stoneclicker.database.DB;
+import ru.kvachenko.stoneclicker.database.Result;
 import ru.kvachenko.stoneclicker.screens.GameScreen;
 
 public class StoneClicker extends Game {
+    private DB db;                          // Database connection
     private StonesCounter score;
     private StonesCounter stonesPerSecond;
     private StonesCounter clickPower;
     private float timeElapsed;
 
-	@Override
+    public StoneClicker(DB databaseConnection) {
+        super();
+        db = databaseConnection;
+    }
+
+    @Override
 	public void create () {
         score = new StonesCounter();
         stonesPerSecond = new StonesCounter();
         clickPower = new StonesCounter(1);
         timeElapsed = 0;
+
+        // DB check; TODO: delete after debug
+        Result res = db.query("SELECT * FROM upgrades;");
+        int nameIndex = res.findColumn("name");
+        int costIndex = res.findColumn("base_cost");
+        while (res.next()) System.out.println(res.getString(nameIndex) + " cost: " + res.getInt(costIndex));
+        // end of db check.
 
 		setScreen(new GameScreen(this));
 	}

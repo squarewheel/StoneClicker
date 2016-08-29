@@ -20,7 +20,6 @@
 package ru.kvachenko.stoneclicker;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.TreeMap;
 
 /**
