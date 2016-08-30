@@ -170,8 +170,9 @@ public class GameScreen implements Screen {
     public GameScreen(final StoneClicker gameController) {
         this.gameController = gameController;
         images = new TextureAtlas(Gdx.files.internal("android/assets/images.atlas"));
-        skin = new Skin();
 
+        // Skin initialization
+        skin = new Skin();
         skin.add("default", new BitmapFont(Gdx.files.internal("android/assets/fonts/sansman24.fnt")));
         skin.add("sansman16", new BitmapFont(Gdx.files.internal("android/assets/fonts/sansman16.fnt")));
         skin.add("default", new Label.LabelStyle(skin.getFont("default"), Color.GOLD));
@@ -222,8 +223,7 @@ public class GameScreen implements Screen {
         skin.add("default", sps);
         skin.add("default", tbs);
 
-        stone = new Image(images.findRegion("stone"));
-
+        // Stages initialization
         mainStage = new Stage(new ScreenViewport()){
             @Override
             public boolean touchDown(int screenX, int screenY, int pointer, int button) {
@@ -247,6 +247,17 @@ public class GameScreen implements Screen {
         };
         uiStage = new Stage(new ScreenViewport());
 
+        // Stone initialization
+        stone = new Image(images.findRegion("stone"));
+        mainStage.addActor(stone);
+
+        // Screen variables initialization
+        screenWidth = mainStage.getViewport().getScreenWidth();
+        screenHeight = mainStage.getViewport().getScreenHeight();
+        stoneMaxWidth = (int) stone.getWidth();
+        stoneMaxHeight  = (int) stone.getHeight();
+
+        // Scores table initialization
         stonesCounterLabel = new Label("--", skin) {
             @Override
             public void act(float delta) {
@@ -268,45 +279,6 @@ public class GameScreen implements Screen {
                 super.act(delta);
             }
         };
-
-        screenWidth = mainStage.getViewport().getScreenWidth();
-        screenHeight = mainStage.getViewport().getScreenHeight();
-        stoneMaxWidth = (int) stone.getWidth();
-        stoneMaxHeight  = (int) stone.getHeight();
-
-        if (stone.getWidth() > screenWidth)
-            stone.setSize(screenWidth, screenWidth); // stone is square
-        mainStage.addActor(stone);
-        stone.setPosition(screenWidth/2 - stone.getWidth()/2, screenHeight/2 - stone.getHeight()/2);
-        stone.setOrigin(stone.getWidth()/2, stone.getHeight()/2);
-        //stone.debug();
-
-        Button closeWindowButton = new Button(skin, "closeWindowButton");
-        menuButton = new Button(skin, "menuButtonStyle");
-        upgradesButton = new Button(skin, "plusButtonStyle");
-
-        Table upgradesTable = new Table(skin);
-        upgradesTable.top();
-        for (Upgrade u: gameController.getUpgradesList()) {
-            UpgradeWidget upgradeWidget = new UpgradeWidget(u);
-
-            upgradesTable.add(upgradeWidget).left().expandX().fillX(); upgradesTable.row();
-        }
-        //upgradesTable.debug();
-
-        ScrollPane upgradesScrollPane = new ScrollPane(upgradesTable, skin);
-        upgradesScrollPane.setVariableSizeKnobs(false);
-        upgradesScrollPane.setFadeScrollBars(false);
-
-        upgradesButton.addListener(new InputListener(){
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                upgradesWindow.setVisible(true);
-                upgradesWindow.toFront();
-                return super.touchDown(event, x, y, pointer, button);
-            }
-        });
-
         scoresTable = new Table(skin);
         scoresTable.setFillParent(true);
         scoresTable.top().left().pad(5, 5, 5, 0);
@@ -321,6 +293,17 @@ public class GameScreen implements Screen {
         uiStage.addActor(scoresTable);
         //scoresTable.debug();
 
+        // Onscreen buttons initialization
+        menuButton = new Button(skin, "menuButtonStyle");
+        upgradesButton = new Button(skin, "plusButtonStyle");
+        upgradesButton.addListener(new InputListener(){
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                upgradesWindow.setVisible(true);
+                upgradesWindow.toFront();
+                return super.touchDown(event, x, y, pointer, button);
+            }
+        });
         Table buttonsTable = new Table(skin);
         buttonsTable.setFillParent(true);
         buttonsTable.top().right().pad(5, 0, 5, 5);
@@ -330,16 +313,18 @@ public class GameScreen implements Screen {
         uiStage.addActor(buttonsTable);
         //buttonsTable.debug();
 
+        // Upgrades window initialization
+        Table upgradesTable = new Table(skin);
+        upgradesTable.top();
+        for (Upgrade u: gameController.getUpgradesList()) {
+            UpgradeWidget upgradeWidget = new UpgradeWidget(u);
+            upgradesTable.add(upgradeWidget).left().expandX().fillX(); upgradesTable.row();
+        }
+        ScrollPane upgradesScrollPane = new ScrollPane(upgradesTable, skin);
+        upgradesScrollPane.setVariableSizeKnobs(false);
+        upgradesScrollPane.setFadeScrollBars(false);
         upgradesWindow = new Window("Upgrades", skin);
-        upgradesWindow.setVisible(false);
-        upgradesWindow.setX(5);
-        upgradesWindow.padLeft(5).padRight(5).padBottom(5);
-        upgradesWindow.padTop(20);
-        upgradesWindow.getTitleTable().add(closeWindowButton);
-        upgradesWindow.add(upgradesScrollPane).left().padTop(5).expandX().fillX();
-        uiStage.addActor(upgradesWindow);
-        //upgradesWindow.debug();
-
+        Button closeWindowButton = new Button(skin, "closeWindowButton");
         closeWindowButton.addListener(new InputListener(){
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
@@ -352,7 +337,17 @@ public class GameScreen implements Screen {
                 super.touchUp(event, x, y, pointer, button);
             }
         });
+        upgradesWindow.setVisible(false);
+        upgradesWindow.setX(5);
+        upgradesWindow.padLeft(5).padRight(5).padBottom(5);
+        upgradesWindow.padTop(20);
+        upgradesWindow.getTitleTable().add(closeWindowButton);
+        upgradesWindow.add(upgradesScrollPane).left().padTop(5).expandX().fillX();
+        uiStage.addActor(upgradesWindow);
+        //upgradesTable.debug();
+        //upgradesWindow.debug();
 
+        // Add stages to global events listener
         Gdx.input.setInputProcessor(new InputMultiplexer(uiStage, mainStage));
     }
 
