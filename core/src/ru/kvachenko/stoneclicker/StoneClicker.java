@@ -57,7 +57,6 @@ public class StoneClicker extends Game {
 //        int spsBonusIndex = res.findColumn("stones_per_second_bonus");
 
         while (res.next()) {
-//            System.out.println(res.getString(nameIndex) + " cost: " + res.getInt(costIndex));
             upgradesList.add(
                     new Upgrade(res.getString(res.findColumn("name")),
                         new BigDecimal(res.getInt(res.findColumn("base_cost"))),
@@ -71,6 +70,7 @@ public class StoneClicker extends Game {
 
 	@Override
 	public void render () {
+        // Each second add stonesPerSecond value to score
         timeElapsed += Gdx.graphics.getDeltaTime();
         if (timeElapsed >= 1) {
             score.addStones(stonesPerSecond.getCounter());
@@ -82,7 +82,7 @@ public class StoneClicker extends Game {
 	
 	@Override
 	public void dispose () {
-
+        // TODO: game dispose
 	}
 
     public StonesCounter getScore() {
@@ -100,25 +100,5 @@ public class StoneClicker extends Game {
     public ArrayList<Upgrade> getUpgradesList() {
         return upgradesList;
     }
-
-    /*
-
-    public void addStonesPerSecond(BigDecimal val) {
-        stonesPerSecond = stonesPerSecond.add(val);
-    }
-
-    public void addClickPower(BigDecimal val) {
-        clickPower = clickPower.add(val);
-    }
-
-    public void removeStonesPerSecond(BigDecimal val) {
-        stonesPerSecond = stonesPerSecond.subtract(val);
-    }
-
-    public void removeClickPower(BigDecimal val) {
-        clickPower = clickPower.subtract(val);
-    }
-*/
-
 
 }

@@ -347,6 +347,8 @@ public class GameScreen implements Screen {
         //upgradesTable.debug();
         //upgradesWindow.debug();
 
+        // Menu window initialization
+
         // Add stages to global events listener
         Gdx.input.setInputProcessor(new InputMultiplexer(uiStage, mainStage));
     }
