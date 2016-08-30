@@ -73,13 +73,10 @@ public class StonesCounter {
 
         for (; grade > 3; grade--) {
             if (value.length() == grade) {
-                String one = value.substring(0, lastCharIndex);
-                char two = value.charAt(lastCharIndex);
-                String three = prefix.lowerEntry(value.length()).getValue();
-
-                value = one + "," +
-                        two +
-                        three;
+                value = value.substring(0, lastCharIndex) + "," +
+                        value.charAt(lastCharIndex) +
+                        prefix.lowerEntry(value.length()).getValue();
+                break;
             }
             lastCharIndex--;
             if (lastCharIndex <= 0) lastCharIndex = 3;

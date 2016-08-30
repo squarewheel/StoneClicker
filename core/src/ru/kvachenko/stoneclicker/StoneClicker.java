@@ -27,6 +27,7 @@ import ru.kvachenko.stoneclicker.screens.GameScreen;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.TreeMap;
 
 public class StoneClicker extends Game {
     private DB db;                          // Database connection
@@ -51,20 +52,7 @@ public class StoneClicker extends Game {
 
         // Get upgrades list from DB
         Result res = db.query("SELECT * FROM upgrades;");
-//        int nameIndex = res.findColumn("name");
-//        int costIndex = res.findColumn("base_cost");
-//        int powerBonusIndex = res.findColumn("click_power_bonus");
-//        int spsBonusIndex = res.findColumn("stones_per_second_bonus");
-
         while (res.next()) {
-            BigDecimal tmp = new BigDecimal(res.getInt(res.findColumn("base_cost")));
-            String stmp = tmp.toBigInteger().toString();
-            System.out.println("length: " + stmp.length());
-            System.out.println("1 " + tmp);
-            System.out.println("2 " + res.getInt(res.findColumn("base_cost")));
-            System.out.println("3 " + tmp.toBigInteger().toString());
-            System.out.println("4 " + StonesCounter.shortedValueOf(tmp));
-
             upgradesList.add(
                     new Upgrade(res.getString(res.findColumn("name")),
                         new BigDecimal(res.getInt(res.findColumn("base_cost"))),
