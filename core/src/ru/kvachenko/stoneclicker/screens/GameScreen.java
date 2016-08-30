@@ -49,15 +49,15 @@ import java.math.BigDecimal;
  */
 public class GameScreen implements Screen {
     private class UpgradeWidget extends Table {
-        Upgrade upgrade;
-        Button buyButton;
-        Button sellButton;
+        private Upgrade upgrade;
+        private Button buyButton;
+        private Button sellButton;
 
         UpgradeWidget(Upgrade u) {
             super();
             upgrade = u;
 
-            Label nameLabel = new Label("Upgrade...", skin);
+            Label nameLabel = new Label(upgrade.getName(), skin);
             Label amountLabel = new Label("x0", skin) {
                 @Override
                 public void act(float delta) {
@@ -117,12 +117,12 @@ public class GameScreen implements Screen {
             this.background(skin.getDrawable("windowImg"));
             this.pad(1, 4, 1, 1);
             this.add(nameLabel).top().left().expandX();
-            this.add(amountLabel).top().right();
+            this.add(amountLabel).top().right().padRight(2);
             this.row().expandY();
             this.add(bonusesLabel).top().left();
             this.row();
-            this.add(buttonsGroup).colspan(2).expandX().bottom().right();
-            this.debug();
+            this.add(buttonsGroup).colspan(2).expandX().bottom().right().pad(0, 0, 2, 2);
+            //this.debug();
 
         }
 
@@ -286,13 +286,9 @@ public class GameScreen implements Screen {
         upgradesButton = new Button(skin, "plusButtonStyle");
 
         Table upgradesTable = new Table(skin);
-        //upgradesTable.setFillParent(true);
         upgradesTable.top();
-        for (int i = 1; i <= 10; i++) {
-            BigDecimal baseCost = new BigDecimal(MathUtils.random(1, 100));
-            BigDecimal powerBonus = new BigDecimal(MathUtils.random(1, 10));
-            BigDecimal spsBonus = new BigDecimal(MathUtils.random(1, 5));
-            UpgradeWidget upgradeWidget = new UpgradeWidget(new Upgrade(baseCost, powerBonus, spsBonus));
+        for (Upgrade u: gameController.getUpgradesList()) {
+            UpgradeWidget upgradeWidget = new UpgradeWidget(u);
 
             upgradesTable.add(upgradeWidget).left().expandX().fillX(); upgradesTable.row();
         }
@@ -323,7 +319,7 @@ public class GameScreen implements Screen {
         scoresTable.add(new Label("SPS: ", skin)).right();
         scoresTable.add(stonesPerSecondLabel).left();
         uiStage.addActor(scoresTable);
-        scoresTable.debug();
+        //scoresTable.debug();
 
         Table buttonsTable = new Table(skin);
         buttonsTable.setFillParent(true);
@@ -336,13 +332,13 @@ public class GameScreen implements Screen {
 
         upgradesWindow = new Window("Upgrades", skin);
         upgradesWindow.setVisible(false);
-        //upgradesWindow.debug();
         upgradesWindow.setX(5);
         upgradesWindow.padLeft(5).padRight(5).padBottom(5);
         upgradesWindow.padTop(20);
         upgradesWindow.getTitleTable().add(closeWindowButton);
         upgradesWindow.add(upgradesScrollPane).left().padTop(5).expandX().fillX();
         uiStage.addActor(upgradesWindow);
+        //upgradesWindow.debug();
 
         closeWindowButton.addListener(new InputListener(){
             @Override

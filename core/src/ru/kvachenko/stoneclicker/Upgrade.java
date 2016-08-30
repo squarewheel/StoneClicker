@@ -29,6 +29,7 @@ import java.math.BigDecimal;
  */
 public class Upgrade {
     private static final BigDecimal costMultiplier = new BigDecimal("1.15");
+    private String name;                // Name of this upgrade
     private BigDecimal baseCost;        // Base cost of this upgrade
     private BigDecimal currentCost;     // Cost of current tier of upgrade
     private BigDecimal powerBonus;      // Bonus to click power
@@ -38,12 +39,17 @@ public class Upgrade {
     //public Upgrade() {
     //}
 
-    public Upgrade(BigDecimal baseCost, BigDecimal clickPowerBonus, BigDecimal stonesPerSecondBonus) {
+    public Upgrade(String upgradeName, BigDecimal baseCost, BigDecimal clickPowerBonus, BigDecimal stonesPerSecondBonus) {
+        name = upgradeName;
         this.baseCost = baseCost;
         currentCost = baseCost;
         powerBonus = clickPowerBonus;
         SPSBonus = stonesPerSecondBonus;
         amount = 0;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public BigDecimal getCost() { return currentCost; }

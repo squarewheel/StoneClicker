@@ -25,12 +25,16 @@ import ru.kvachenko.stoneclicker.database.DB;
 import ru.kvachenko.stoneclicker.database.Result;
 import ru.kvachenko.stoneclicker.screens.GameScreen;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+
 public class StoneClicker extends Game {
     private DB db;                          // Database connection
     private StonesCounter score;
     private StonesCounter stonesPerSecond;
     private StonesCounter clickPower;
     private float timeElapsed;
+    private ArrayList<Upgrade> upgradesList;
 
     public StoneClicker(DB databaseConnection) {
         super();
@@ -43,13 +47,24 @@ public class StoneClicker extends Game {
         stonesPerSecond = new StonesCounter();
         clickPower = new StonesCounter(1);
         timeElapsed = 0;
+        upgradesList = new ArrayList<Upgrade>();
 
-        // DB check; TODO: delete after debug
+        // Get upgrades list from DB
         Result res = db.query("SELECT * FROM upgrades;");
-        int nameIndex = res.findColumn("name");
-        int costIndex = res.findColumn("base_cost");
-        while (res.next()) System.out.println(res.getString(nameIndex) + " cost: " + res.getInt(costIndex));
-        // end of db check.
+//        int nameIndex = res.findColumn("name");
+//        int costIndex = res.findColumn("base_cost");
+//        int powerBonusIndex = res.findColumn("click_power_bonus");
+//        int spsBonusIndex = res.findColumn("stones_per_second_bonus");
+
+        while (res.next()) {
+//            System.out.println(res.getString(nameIndex) + " cost: " + res.getInt(costIndex));
+            upgradesList.add(
+                    new Upgrade(res.getString(res.findColumn("name")),
+                        new BigDecimal(res.getInt(res.findColumn("base_cost"))),
+                        new BigDecimal(res.getInt(res.findColumn("click_power_bonus"))),
+                        new BigDecimal(res.getInt(res.findColumn("stones_per_second_bonus"))))
+            );
+        }
 
 		setScreen(new GameScreen(this));
 	}
@@ -82,7 +97,11 @@ public class StoneClicker extends Game {
         return clickPower;
     }
 
-/*
+    public ArrayList<Upgrade> getUpgradesList() {
+        return upgradesList;
+    }
+
+    /*
 
     public void addStonesPerSecond(BigDecimal val) {
         stonesPerSecond = stonesPerSecond.add(val);
