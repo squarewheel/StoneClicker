@@ -293,26 +293,6 @@ public class GameScreen implements Screen {
         uiStage.addActor(scoresTable);
         //scoresTable.debug();
 
-        // Onscreen buttons initialization
-        menuButton = new Button(skin, "menuButtonStyle");
-        upgradesButton = new Button(skin, "plusButtonStyle");
-        upgradesButton.addListener(new InputListener(){
-            @Override
-            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
-                upgradesWindow.setVisible(true);
-                upgradesWindow.toFront();
-                return super.touchDown(event, x, y, pointer, button);
-            }
-        });
-        Table buttonsTable = new Table(skin);
-        buttonsTable.setFillParent(true);
-        buttonsTable.top().right().pad(5, 0, 5, 5);
-        buttonsTable.add(menuButton).top().right();
-        buttonsTable.row();
-        buttonsTable.add(upgradesButton);
-        uiStage.addActor(buttonsTable);
-        //buttonsTable.debug();
-
         // Upgrades window initialization
         Table upgradesTable = new Table(skin);
         upgradesTable.top();
@@ -348,6 +328,62 @@ public class GameScreen implements Screen {
         //upgradesWindow.debug();
 
         // Menu window initialization
+        TextButton continueGameButton = new TextButton("CONTINUE GAME", skin);
+        TextButton exitGameButton = new TextButton("EXIT", skin);
+        final Dialog menuWindow = new Dialog("GAME SAVED", skin);
+        menuWindow.padTop(20);
+        menuWindow.getButtonTable().add(continueGameButton).fillX();
+        menuWindow.getButtonTable().row();
+        menuWindow.getButtonTable().add(exitGameButton).fillX();
+        continueGameButton.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                menuWindow.hide();
+            }
+        });
+        exitGameButton.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                return true;
+            }
+
+            @Override
+            public void touchUp(InputEvent event, float x, float y, int pointer, int button) {
+                Gdx.app.exit();
+            }
+        });
+
+        // Onscreen buttons initialization
+        menuButton = new Button(skin, "menuButtonStyle");
+        menuButton.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                menuWindow.show(uiStage);
+                return super.touchDown(event, x, y, pointer, button);
+            }
+        });
+        upgradesButton = new Button(skin, "plusButtonStyle");
+        upgradesButton.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                upgradesWindow.setVisible(true);
+                upgradesWindow.toFront();
+                return super.touchDown(event, x, y, pointer, button);
+            }
+        });
+        Table buttonsTable = new Table(skin);
+        buttonsTable.setFillParent(true);
+        buttonsTable.top().right().pad(5, 0, 5, 5);
+        buttonsTable.add(menuButton).top().right();
+        buttonsTable.row();
+        buttonsTable.add(upgradesButton);
+        uiStage.addActor(buttonsTable);
+        //buttonsTable.debug();
 
         // Add stages to global events listener
         Gdx.input.setInputProcessor(new InputMultiplexer(uiStage, mainStage));
