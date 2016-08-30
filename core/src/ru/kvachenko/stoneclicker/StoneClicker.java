@@ -57,6 +57,14 @@ public class StoneClicker extends Game {
 //        int spsBonusIndex = res.findColumn("stones_per_second_bonus");
 
         while (res.next()) {
+            BigDecimal tmp = new BigDecimal(res.getInt(res.findColumn("base_cost")));
+            String stmp = tmp.toBigInteger().toString();
+            System.out.println("length: " + stmp.length());
+            System.out.println("1 " + tmp);
+            System.out.println("2 " + res.getInt(res.findColumn("base_cost")));
+            System.out.println("3 " + tmp.toBigInteger().toString());
+            System.out.println("4 " + StonesCounter.shortedValueOf(tmp));
+
             upgradesList.add(
                     new Upgrade(res.getString(res.findColumn("name")),
                         new BigDecimal(res.getInt(res.findColumn("base_cost"))),

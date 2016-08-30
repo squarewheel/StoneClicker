@@ -46,6 +46,8 @@ public class Upgrade {
         powerBonus = clickPowerBonus;
         SPSBonus = stonesPerSecondBonus;
         amount = 0;
+
+        System.out.println(StonesCounter.shortedValueOf(this.getCost()));
     }
 
     public String getName() {

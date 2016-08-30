@@ -72,11 +72,15 @@ public class StonesCounter {
         //System.out.println(" prefix: " + prefix.lowerEntry(value.length()).getValue());
 
         for (; grade > 3; grade--) {
-            if (value.length() == grade)
-                value = value.substring(0, lastCharIndex) + "," +
-                        value.charAt(lastCharIndex) +
-                        prefix.lowerEntry(value.length()).getValue();
+            if (value.length() == grade) {
+                String one = value.substring(0, lastCharIndex);
+                char two = value.charAt(lastCharIndex);
+                String three = prefix.lowerEntry(value.length()).getValue();
 
+                value = one + "," +
+                        two +
+                        three;
+            }
             lastCharIndex--;
             if (lastCharIndex <= 0) lastCharIndex = 3;
         }

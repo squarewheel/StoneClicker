@@ -72,8 +72,6 @@ public class GameScreen implements Screen {
                     super.act(delta);
                 }
             };
-            //Label descriptionLabel = new Label("Lorem ipsum dolor sit amet.", skin, "upgradeLabel");
-            //descriptionLabel.setWrap(true);
             Label bonusesLabel = new Label("", skin, "upgradeLabel") {
                 @Override
                 public void act(float delta) {
@@ -85,7 +83,6 @@ public class GameScreen implements Screen {
 
             buyButton = new Button(skin, "plusButtonStyle");
             sellButton = new Button(skin, "minusButtonStyle");
-
             buyButton.addListener(new InputListener(){
                 @Override
                 public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
