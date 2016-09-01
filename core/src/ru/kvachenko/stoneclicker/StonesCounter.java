@@ -27,6 +27,7 @@ import java.util.TreeMap;
  *         Created on 18.08.2016.
  *         <p>
  *         Class for store and representation big int values.
+ *         // TODO: reneme this class and methods
  */
 public class StonesCounter {
     private static TreeMap<Integer, String> prefix;
@@ -43,6 +44,10 @@ public class StonesCounter {
         prefix.put(6, "M");
         prefix.put(3, "K");
         prefix.put(0, "");
+    }
+
+    public StonesCounter(BigDecimal initialValue) {
+        counter = new BigDecimal(initialValue.toString());
     }
 
     public StonesCounter(int initialValue) {

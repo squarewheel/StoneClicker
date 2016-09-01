@@ -28,7 +28,26 @@ import java.math.BigDecimal;
  *         Upgrades buying for get stones without clicks and for incrase click power.
  */
 public class Upgrade {
+    static class UpgradeSaveDescriptor {
+        String name;
+        String baseCost;
+        String currentCost;
+        String powerBonus;
+        String SPSBonus;
+        int amount = 0;
+
+//        public UpgradeSaveDescriptor() {
+//            String name = null;
+//            String baseCost = null;
+//            String currentCost = null;
+//            String powerBonus = null;
+//            String SPSBonus = null;
+//            int amount = 0;
+//        }
+    }
+
     private static final BigDecimal costMultiplier = new BigDecimal("1.15");
+    private UpgradeSaveDescriptor upgradeSaveDescriptor;
     private String name;                // Name of this upgrade
     private BigDecimal baseCost;        // Base cost of this upgrade
     private BigDecimal currentCost;     // Cost of current tier of upgrade
@@ -39,13 +58,24 @@ public class Upgrade {
     //public Upgrade() {
     //}
 
-    public Upgrade(String upgradeName, BigDecimal baseCost, BigDecimal clickPowerBonus, BigDecimal stonesPerSecondBonus) {
+    Upgrade(String upgradeName, BigDecimal baseCost, BigDecimal clickPowerBonus, BigDecimal stonesPerSecondBonus) {
+        upgradeSaveDescriptor = new UpgradeSaveDescriptor();
         name = upgradeName;
         this.baseCost = baseCost;
         currentCost = baseCost;
         powerBonus = clickPowerBonus;
         SPSBonus = stonesPerSecondBonus;
         amount = 0;
+    }
+
+    UpgradeSaveDescriptor getSaveDescriptor() {
+        upgradeSaveDescriptor.name = name;
+        upgradeSaveDescriptor.baseCost = baseCost.toString();
+        upgradeSaveDescriptor.currentCost = currentCost.toString();
+        upgradeSaveDescriptor.powerBonus = powerBonus.toString();
+        upgradeSaveDescriptor.SPSBonus = SPSBonus.toString();
+        upgradeSaveDescriptor.amount = amount;
+        return upgradeSaveDescriptor;
     }
 
     public String getName() {
@@ -66,15 +96,18 @@ public class Upgrade {
         return amount;
     }
 
+    void setAmount(int amount) {
+        this.amount = amount;
+        if (this.amount > 0) currentCost = baseCost.multiply(costMultiplier.multiply(new BigDecimal(amount + 1)));
+    }
+
     public void buy(StoneClicker gameController) {
         if (gameController.getScore().getCounter().compareTo(currentCost) < 0) return;
 
         gameController.getScore().removeStones(currentCost);
         gameController.getClickPower().addStones(powerBonus);
         gameController.getStonesPerSecond().addStones(SPSBonus);
-        amount++;
-
-        currentCost = baseCost.multiply(costMultiplier.multiply(new BigDecimal(amount + 1)));
+        setAmount(++amount);
     }
 
     public void sell(StoneClicker gameController) {

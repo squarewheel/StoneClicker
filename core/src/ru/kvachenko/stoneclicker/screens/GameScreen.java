@@ -360,6 +360,7 @@ public class GameScreen implements Screen {
         menuButton.addListener(new InputListener() {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                gameController.saveGame();
                 menuWindow.show(uiStage);
                 return super.touchDown(event, x, y, pointer, button);
             }
@@ -388,7 +389,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        // TODO: screen dispose
     }
 
     @Override

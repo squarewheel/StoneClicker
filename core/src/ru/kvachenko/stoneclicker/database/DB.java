@@ -25,6 +25,7 @@ package ru.kvachenko.stoneclicker.database;
  *         <p>
  *         Class for working with DB.
  *         [ http://stackoverflow.com/questions/15874824/using-a-sqlite-database-in-libgdx ]
+ *         TODO: Android implementation of DB
  */
 public abstract class DB {
     protected String dataBaseName;

@@ -21,6 +21,10 @@ package ru.kvachenko.stoneclicker;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.utils.Base64Coder;
+import com.badlogic.gdx.utils.Json;
+import com.badlogic.gdx.utils.JsonWriter;
 import ru.kvachenko.stoneclicker.database.DB;
 import ru.kvachenko.stoneclicker.database.Result;
 import ru.kvachenko.stoneclicker.screens.GameScreen;
@@ -30,12 +34,27 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 
 public class StoneClicker extends Game {
-    private DB db;                          // Database connection
-    private StonesCounter score;
-    private StonesCounter stonesPerSecond;
-    private StonesCounter clickPower;
-    private float timeElapsed;
-    private ArrayList<Upgrade> upgradesList;
+    private static class SaveGameDescriptor {
+        private String score = null;
+        private float timeElapsed = 0;
+        private ArrayList<Upgrade.UpgradeSaveDescriptor> upgradesList  = new ArrayList<Upgrade.UpgradeSaveDescriptor>();
+
+//        SaveGameDescriptor() {
+//            score = null;
+//            timeElapsed = 0;
+//            upgradesList = new ArrayList<Upgrade.UpgradeSaveDescriptor>();
+//        }
+    }
+
+    private DB db;                                  // Database connection
+    private Json json;                              // Json for save and load game
+    private SaveGameDescriptor gameSaveDescriptor;  // Object for JSON
+    private FileHandle gameSaveFile;                // File for saving game state
+    private StonesCounter score;                    // Total amount of stones
+    private StonesCounter stonesPerSecond;          //
+    private StonesCounter clickPower;               // Num of stones given by one click
+    private float timeElapsed;                      //
+    private ArrayList<Upgrade> upgradesList;        //
 
     public StoneClicker(DB databaseConnection) {
         super();
@@ -44,22 +63,17 @@ public class StoneClicker extends Game {
 
     @Override
 	public void create () {
-        score = new StonesCounter();
+        json = new Json();
+        json.setOutputType(JsonWriter.OutputType.json);
+        gameSaveFile = Gdx.files.local("save.json");
+
         stonesPerSecond = new StonesCounter();
         clickPower = new StonesCounter(1);
-        timeElapsed = 0;
         upgradesList = new ArrayList<Upgrade>();
 
-        // Get upgrades list from DB
-        Result res = db.query("SELECT * FROM upgrades;");
-        while (res.next()) {
-            upgradesList.add(
-                    new Upgrade(res.getString(res.findColumn("name")),
-                        new BigDecimal(res.getInt(res.findColumn("base_cost"))),
-                        new BigDecimal(res.getInt(res.findColumn("click_power_bonus"))),
-                        new BigDecimal(res.getInt(res.findColumn("stones_per_second_bonus"))))
-            );
-        }
+        // Check saved game and load if save file exists
+        if (gameSaveFile.exists()) loadGame();
+        else newGame();
 
 		setScreen(new GameScreen(this));
 	}
@@ -80,6 +94,46 @@ public class StoneClicker extends Game {
 	public void dispose () {
         // TODO: game dispose
 	}
+
+    public void newGame() {
+        gameSaveDescriptor = new SaveGameDescriptor();
+        score = new StonesCounter();
+        timeElapsed = 0;
+
+        // Get upgrades list from DB
+        Result res = db.query("SELECT * FROM upgrades;");
+        while (res.next()) {
+            upgradesList.add(
+                    new Upgrade(res.getString(res.findColumn("name")),
+                            new BigDecimal(res.getInt(res.findColumn("base_cost"))),
+                            new BigDecimal(res.getInt(res.findColumn("click_power_bonus"))),
+                            new BigDecimal(res.getInt(res.findColumn("stones_per_second_bonus"))))
+            );
+        }
+    }
+
+    public void saveGame() {
+        if (gameSaveDescriptor.upgradesList != null) gameSaveDescriptor.upgradesList.clear();
+        gameSaveDescriptor.score = score.getStones();
+        gameSaveDescriptor.timeElapsed = timeElapsed;
+        for (Upgrade u: upgradesList) gameSaveDescriptor.upgradesList.add(u.getSaveDescriptor());
+        gameSaveFile.writeString(Base64Coder.encodeString(json.toJson(gameSaveDescriptor)), false);
+        //System.out.println(gameSaveDescriptor.json.prettyPrint(gameSaveDescriptor));
+    }
+
+    public void loadGame() {
+        gameSaveDescriptor = json.fromJson(SaveGameDescriptor.class, Base64Coder.decodeString(gameSaveFile.readString()));
+        score = new StonesCounter(new BigDecimal(gameSaveDescriptor.score));
+        timeElapsed = gameSaveDescriptor.timeElapsed;
+
+        for (Upgrade.UpgradeSaveDescriptor u: gameSaveDescriptor.upgradesList) {
+            Upgrade upgrade = new Upgrade(u.name, new BigDecimal(u.baseCost), new BigDecimal(u.powerBonus), new BigDecimal(u.SPSBonus));
+            upgrade.setAmount(u.amount);
+            clickPower.addStones(upgrade.getPowerBonus().multiply(new BigDecimal(upgrade.getAmount())));
+            stonesPerSecond.addStones(upgrade.getSPSBonus().multiply(new BigDecimal(upgrade.getAmount())));
+            upgradesList.add(upgrade);
+        }
+    }
 
     public StonesCounter getScore() {
         return score;
