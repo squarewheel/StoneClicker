@@ -25,16 +25,17 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Base64Coder;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
+import com.badlogic.gdx.utils.TimeUtils;
 import ru.kvachenko.stoneclicker.database.DB;
 import ru.kvachenko.stoneclicker.database.Result;
 import ru.kvachenko.stoneclicker.screens.GameScreen;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.TreeMap;
 
 public class StoneClicker extends Game {
     private static class SaveGameDescriptor {
+        private long timestamp;
         private String score = null;
         private float timeElapsed = 0;
         private ArrayList<Upgrade.UpgradeSaveDescriptor> upgradesList  = new ArrayList<Upgrade.UpgradeSaveDescriptor>();
@@ -122,9 +123,10 @@ public class StoneClicker extends Game {
     }
 
     public void saveGame() {
-        if (gameSaveDescriptor.upgradesList != null) gameSaveDescriptor.upgradesList.clear();
+        gameSaveDescriptor.timestamp = TimeUtils.millis();
         gameSaveDescriptor.score = score.getCounter().toString();
         gameSaveDescriptor.timeElapsed = timeElapsed;
+        if (gameSaveDescriptor.upgradesList != null) gameSaveDescriptor.upgradesList.clear();
         for (Upgrade u: upgradesList) gameSaveDescriptor.upgradesList.add(u.getSaveDescriptor());
         gameSaveFile.writeString(Base64Coder.encodeString(json.toJson(gameSaveDescriptor)), false);
         //System.out.println("game saved");
@@ -143,6 +145,12 @@ public class StoneClicker extends Game {
             stonesPerSecond.addStones(upgrade.getSPSBonus().multiply(new BigDecimal(upgrade.getAmount())));
             upgradesList.add(upgrade);
         }
+
+        double offlineTime = (TimeUtils.millis() - gameSaveDescriptor.timestamp) / 1000;
+        //BigDecimal offlineBonus = stonesPerSecond.getCounter().multiply(new BigDecimal(offlineTime));
+        //System.out.println("offline time: " + offlineTime);
+        //System.out.println("offline bonus: " + offlineBonus);
+        score.addStones(stonesPerSecond.getCounter().multiply(new BigDecimal(offlineTime)));
     }
 
     public StonesCounter getScore() {
