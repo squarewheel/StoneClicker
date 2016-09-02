@@ -54,6 +54,7 @@ public class StoneClicker extends Game {
     private StonesCounter stonesPerSecond;          //
     private StonesCounter clickPower;               // Num of stones given by one click
     private float timeElapsed;                      //
+    private float autoSaveTimer;                    //
     private ArrayList<Upgrade> upgradesList;        //
 
     public StoneClicker(DB databaseConnection) {
@@ -69,6 +70,7 @@ public class StoneClicker extends Game {
 
         stonesPerSecond = new StonesCounter();
         clickPower = new StonesCounter(1);
+        autoSaveTimer = 0;
         upgradesList = new ArrayList<Upgrade>();
 
         // Check saved game and load if save file exists
@@ -85,6 +87,13 @@ public class StoneClicker extends Game {
         if (timeElapsed >= 1) {
             score.addStones(stonesPerSecond.getCounter());
             timeElapsed = 0;
+        }
+
+        // Auto save game every minute
+        autoSaveTimer += Gdx.graphics.getDeltaTime();
+        if (autoSaveTimer >= 60) {
+            autoSaveTimer = 0;
+            saveGame();
         }
 
 		super.render();
@@ -114,15 +123,16 @@ public class StoneClicker extends Game {
 
     public void saveGame() {
         if (gameSaveDescriptor.upgradesList != null) gameSaveDescriptor.upgradesList.clear();
-        gameSaveDescriptor.score = score.getStones();
+        gameSaveDescriptor.score = score.getCounter().toString();
         gameSaveDescriptor.timeElapsed = timeElapsed;
         for (Upgrade u: upgradesList) gameSaveDescriptor.upgradesList.add(u.getSaveDescriptor());
         gameSaveFile.writeString(Base64Coder.encodeString(json.toJson(gameSaveDescriptor)), false);
-        //System.out.println(gameSaveDescriptor.json.prettyPrint(gameSaveDescriptor));
+        //System.out.println("game saved");
     }
 
     public void loadGame() {
         gameSaveDescriptor = json.fromJson(SaveGameDescriptor.class, Base64Coder.decodeString(gameSaveFile.readString()));
+        //System.out.println(json.prettyPrint(gameSaveDescriptor));
         score = new StonesCounter(new BigDecimal(gameSaveDescriptor.score));
         timeElapsed = gameSaveDescriptor.timeElapsed;
 

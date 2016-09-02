@@ -325,6 +325,7 @@ public class GameScreen implements Screen {
         //upgradesWindow.debug();
 
         // Menu window initialization
+        // TODO: add restart game button
         TextButton continueGameButton = new TextButton("CONTINUE GAME", skin);
         TextButton exitGameButton = new TextButton("EXIT", skin);
         final Dialog menuWindow = new Dialog("GAME SAVED", skin);
