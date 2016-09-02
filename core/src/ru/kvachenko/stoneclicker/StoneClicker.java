@@ -29,9 +29,11 @@ import com.badlogic.gdx.utils.TimeUtils;
 import ru.kvachenko.stoneclicker.database.DB;
 import ru.kvachenko.stoneclicker.database.Result;
 import ru.kvachenko.stoneclicker.screens.GameScreen;
+import ru.kvachenko.stoneclicker.screens.LoadingScreen;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 public class StoneClicker extends Game {
     private static class SaveGameDescriptor {
@@ -57,6 +59,7 @@ public class StoneClicker extends Game {
     private float timeElapsed;                      //
     private float autoSaveTimer;                    //
     private ArrayList<Upgrade> upgradesList;        //
+    private LinkedList<String> messagesList;        // Messages for shown on game screen
 
     public StoneClicker(DB databaseConnection) {
         super();
@@ -65,6 +68,8 @@ public class StoneClicker extends Game {
 
     @Override
 	public void create () {
+        setScreen(new LoadingScreen());
+
         json = new Json();
         json.setOutputType(JsonWriter.OutputType.json);
         gameSaveFile = Gdx.files.local("save.json");
@@ -73,12 +78,14 @@ public class StoneClicker extends Game {
         clickPower = new StonesCounter(1);
         autoSaveTimer = 0;
         upgradesList = new ArrayList<Upgrade>();
+        messagesList = new LinkedList<String>();
 
         // Check saved game and load if save file exists
         if (gameSaveFile.exists()) loadGame();
         else newGame();
 
-		setScreen(new GameScreen(this));
+        GameScreen gameScreen = new GameScreen(this);
+		setScreen(gameScreen);
 	}
 
 	@Override
@@ -147,10 +154,11 @@ public class StoneClicker extends Game {
         }
 
         double offlineTime = (TimeUtils.millis() - gameSaveDescriptor.timestamp) / 1000;
-        //BigDecimal offlineBonus = stonesPerSecond.getCounter().multiply(new BigDecimal(offlineTime));
+        BigDecimal offlineBonus = stonesPerSecond.getCounter().multiply(new BigDecimal(offlineTime));
+        messagesList.addLast("Offline Bonus: " + offlineBonus.toString());
         //System.out.println("offline time: " + offlineTime);
         //System.out.println("offline bonus: " + offlineBonus);
-        score.addStones(stonesPerSecond.getCounter().multiply(new BigDecimal(offlineTime)));
+        score.addStones(offlineBonus);
     }
 
     public StonesCounter getScore() {
@@ -169,4 +177,7 @@ public class StoneClicker extends Game {
         return upgradesList;
     }
 
+    public LinkedList<String> getMessagesList() {
+        return messagesList;
+    }
 }

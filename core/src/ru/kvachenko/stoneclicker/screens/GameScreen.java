@@ -34,6 +34,7 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import ru.kvachenko.stoneclicker.StoneClicker;
 import ru.kvachenko.stoneclicker.StonesCounter;
@@ -152,6 +153,7 @@ public class GameScreen implements Screen {
     private Label stonesCounterLabel;
     private Label stonesPerSecondLabel;
     private Label clickPowerLabel;
+    private Label messagesLabel;
     private Table scoresTable;
     private Button menuButton;
     private Button upgradesButton;
@@ -289,6 +291,11 @@ public class GameScreen implements Screen {
         scoresTable.add(stonesPerSecondLabel).left();
         uiStage.addActor(scoresTable);
         //scoresTable.debug();
+
+        // Messages label initialization
+        messagesLabel = new Label("----", skin);
+        messagesLabel.setVisible(false);
+        uiStage.addActor(messagesLabel);
 
         // Upgrades window initialization
         Table upgradesTable = new Table(skin);
