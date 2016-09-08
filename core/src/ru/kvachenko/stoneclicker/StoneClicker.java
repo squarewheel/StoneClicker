@@ -59,7 +59,7 @@ public class StoneClicker extends Game {
     private float timeElapsed;                      //
     private float autoSaveTimer;                    //
     private ArrayList<Upgrade> upgradesList;        //
-    private LinkedList<String> messagesList;        // Messages for shown on game screen
+    private LinkedList<String> messagesList;        //
 
     public StoneClicker(DB databaseConnection) {
         super();
@@ -72,7 +72,7 @@ public class StoneClicker extends Game {
 
         json = new Json();
         json.setOutputType(JsonWriter.OutputType.json);
-        gameSaveFile = Gdx.files.local("save.json");
+        gameSaveFile = Gdx.files.local("save.scs");     // Stone-Clicker-Save (.scs)
 
         stonesPerSecond = new StonesCounter();
         clickPower = new StonesCounter(1);
@@ -155,9 +155,7 @@ public class StoneClicker extends Game {
 
         double offlineTime = (TimeUtils.millis() - gameSaveDescriptor.timestamp) / 1000;
         BigDecimal offlineBonus = stonesPerSecond.getCounter().multiply(new BigDecimal(offlineTime));
-        messagesList.addLast("Offline Bonus: " + offlineBonus.toString());
-        //System.out.println("offline time: " + offlineTime);
-        //System.out.println("offline bonus: " + offlineBonus);
+        messagesList.addLast("Offline Bonus: " + StonesCounter.shortedValueOf(offlineBonus));
         score.addStones(offlineBonus);
     }
 

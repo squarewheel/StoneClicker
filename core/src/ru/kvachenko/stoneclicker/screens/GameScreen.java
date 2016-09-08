@@ -34,13 +34,14 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import ru.kvachenko.stoneclicker.StoneClicker;
 import ru.kvachenko.stoneclicker.StonesCounter;
 import ru.kvachenko.stoneclicker.Upgrade;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * @author Sasha Kvachenko
@@ -154,7 +155,9 @@ public class GameScreen implements Screen {
     private Label stonesPerSecondLabel;
     private Label clickPowerLabel;
     private Label messagesLabel;
+    //private Container<Label> messagesContainer;
     private Table scoresTable;
+    private Table messagesTable;
     private Button menuButton;
     private Button upgradesButton;
     private Window upgradesWindow;
@@ -293,9 +296,19 @@ public class GameScreen implements Screen {
         //scoresTable.debug();
 
         // Messages label initialization
-        messagesLabel = new Label("----", skin);
-        messagesLabel.setVisible(false);
-        uiStage.addActor(messagesLabel);
+        messagesLabel = new Label("HELLO.", skin);
+        messagesTable = new Table(skin) {
+            @Override
+            public void act(float delta) {
+                super.act(delta);
+                this.setSize(messagesLabel.getWidth() + 10, messagesLabel.getHeight() +5);
+                this.setX(screenWidth/2 - this.getWidth()/2);
+            }
+        };
+        messagesTable.background(skin.getDrawable("windowImg"));
+        messagesTable.add(messagesLabel).fill();
+        uiStage.addActor(messagesTable);
+        //messagesTable.debug();
 
         // Upgrades window initialization
         Table upgradesTable = new Table(skin);
@@ -328,6 +341,7 @@ public class GameScreen implements Screen {
         upgradesWindow.getTitleTable().add(closeWindowButton);
         upgradesWindow.add(upgradesScrollPane).left().padTop(5).expandX().fillX();
         uiStage.addActor(upgradesWindow);
+        upgradesWindow.toBack();
         //upgradesTable.debug();
         //upgradesWindow.debug();
 
@@ -378,7 +392,7 @@ public class GameScreen implements Screen {
             @Override
             public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
                 upgradesWindow.setVisible(true);
-                upgradesWindow.toFront();
+                //upgradesWindow.toFront();
                 return super.touchDown(event, x, y, pointer, button);
             }
         });
@@ -407,9 +421,26 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+        // Show message on game screen
+        LinkedList<String> messages = gameController.getMessagesList();
+        if (!messages.isEmpty()) {
+            if (!messagesTable.hasActions()) {
+                messagesLabel.setText(messages.removeFirst());
+                messagesTable.addAction(Actions.sequence(
+                        Actions.fadeIn(1),
+                        Actions.delay(4),
+                        Actions.fadeOut(1)));
+                messagesTable.toFront();
+            }
+        }
+
         // Update game state
         mainStage.act(delta);
         uiStage.act(delta);
+
+        // Debug
+        //messagesLabel.toFront();
+        //upgradesWindow.toBack();
 
         // Clean screen and draw stages
         Gdx.gl.glClearColor(1, 1, 1, 1);
@@ -430,6 +461,7 @@ public class GameScreen implements Screen {
         screenWidth = mainStage.getViewport().getScreenWidth();
         screenHeight = mainStage.getViewport().getScreenHeight();
         stone.setPosition((float) screenWidth/2 - stone.getWidth()/2, (float) screenHeight/2 - stone.getHeight()/2);
+        messagesTable.setY(10);
         upgradesWindow.setSize(screenWidth, screenHeight - (menuButton.getHeight() + upgradesButton.getHeight() + 20));
         upgradesWindow.setX(5);
     }
