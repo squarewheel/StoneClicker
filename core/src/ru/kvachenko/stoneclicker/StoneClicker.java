@@ -22,6 +22,7 @@ package ru.kvachenko.stoneclicker;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Base64Coder;
 import com.badlogic.gdx.utils.Json;
 import com.badlogic.gdx.utils.JsonWriter;
@@ -53,11 +54,13 @@ public class StoneClicker extends Game {
     private Json json;                              // Json for save and load game
     private SaveGameDescriptor gameSaveDescriptor;  // Object for JSON
     private FileHandle gameSaveFile;                // File for saving game state
-    private StonesCounter score;                    // Total amount of stones
-    private StonesCounter stonesPerSecond;          //
-    private StonesCounter clickPower;               // Num of stones given by one click
+    private Counter score;                          // Total amount of stones
+    private Counter stonesPerSecond;                //
+    private Counter clickPower;                     // Num of stones given by one click
     private float timeElapsed;                      //
     private float autoSaveTimer;                    //
+    private float korovanTimer;                     //
+    private Bonus korovan;                          //
     private ArrayList<Upgrade> upgradesList;        //
     private LinkedList<String> messagesList;        //
 
@@ -74,9 +77,11 @@ public class StoneClicker extends Game {
         json.setOutputType(JsonWriter.OutputType.json);
         gameSaveFile = Gdx.files.local("save.scs");     // Stone-Clicker-Save (.scs)
 
-        stonesPerSecond = new StonesCounter();
-        clickPower = new StonesCounter(1);
+        stonesPerSecond = new Counter();
+        clickPower = new Counter(1);
         autoSaveTimer = 0;
+        korovanTimer = 0;
+        korovan = new Bonus(this);
         upgradesList = new ArrayList<Upgrade>();
         messagesList = new LinkedList<String>();
 
@@ -90,10 +95,22 @@ public class StoneClicker extends Game {
 
 	@Override
 	public void render () {
-        // Each second add stonesPerSecond value to score
         timeElapsed += Gdx.graphics.getDeltaTime();
+
+        // One time in second has chance to spawn korovan
+        if (korovanTimer <= 0 && timeElapsed >= 1) {
+            if (MathUtils.random(1, 100) > 95) {
+                korovan.setActive(true);
+                korovanTimer = MathUtils.random(0.5f, 3.0f);
+            }
+        }
+        else if (korovanTimer > 0) korovanTimer -= Gdx.graphics.getDeltaTime();
+        else if (korovan.isActive()) korovan.setActive(false);
+
+
+        // Each second add stonesPerSecond value to score
         if (timeElapsed >= 1) {
-            score.addStones(stonesPerSecond.getCounter());
+            score.increaseValue(stonesPerSecond.getCounter());
             timeElapsed = 0;
         }
 
@@ -114,7 +131,7 @@ public class StoneClicker extends Game {
 
     public void newGame() {
         gameSaveDescriptor = new SaveGameDescriptor();
-        score = new StonesCounter();
+        score = new Counter();
         timeElapsed = 0;
 
         // Get upgrades list from DB
@@ -142,33 +159,37 @@ public class StoneClicker extends Game {
     public void loadGame() {
         gameSaveDescriptor = json.fromJson(SaveGameDescriptor.class, Base64Coder.decodeString(gameSaveFile.readString()));
         //System.out.println(json.prettyPrint(gameSaveDescriptor));
-        score = new StonesCounter(new BigDecimal(gameSaveDescriptor.score));
+        score = new Counter(new BigDecimal(gameSaveDescriptor.score));
         timeElapsed = gameSaveDescriptor.timeElapsed;
 
         for (Upgrade.UpgradeSaveDescriptor u: gameSaveDescriptor.upgradesList) {
             Upgrade upgrade = new Upgrade(u.name, new BigDecimal(u.baseCost), new BigDecimal(u.powerBonus), new BigDecimal(u.SPSBonus));
             upgrade.setAmount(u.amount);
-            clickPower.addStones(upgrade.getPowerBonus().multiply(new BigDecimal(upgrade.getAmount())));
-            stonesPerSecond.addStones(upgrade.getSPSBonus().multiply(new BigDecimal(upgrade.getAmount())));
+            clickPower.increaseValue(upgrade.getPowerBonus().multiply(new BigDecimal(upgrade.getAmount())));
+            stonesPerSecond.increaseValue(upgrade.getSPSBonus().multiply(new BigDecimal(upgrade.getAmount())));
             upgradesList.add(upgrade);
         }
 
         double offlineTime = (TimeUtils.millis() - gameSaveDescriptor.timestamp) / 1000;
         BigDecimal offlineBonus = stonesPerSecond.getCounter().multiply(new BigDecimal(offlineTime));
-        messagesList.addLast("Offline Bonus: " + StonesCounter.shortedValueOf(offlineBonus));
-        score.addStones(offlineBonus);
+        messagesList.addLast("Offline Bonus: " + Counter.shortedValueOf(offlineBonus));
+        score.increaseValue(offlineBonus);
     }
 
-    public StonesCounter getScore() {
+    public Counter getScore() {
         return score;
     }
 
-    public StonesCounter getStonesPerSecond() {
+    public Counter getStonesPerSecond() {
         return stonesPerSecond;
     }
 
-    public StonesCounter getClickPower() {
+    public Counter getClickPower() {
         return clickPower;
+    }
+
+    public Bonus getKorovan() {
+        return korovan;
     }
 
     public ArrayList<Upgrade> getUpgradesList() {
@@ -178,4 +199,10 @@ public class StoneClicker extends Game {
     public LinkedList<String> getMessagesList() {
         return messagesList;
     }
+
+    public float getKorovanTimer() {
+        return korovanTimer;
+    }
+
+    public void resetKorovanTimer() { korovanTimer = 0; }
 }

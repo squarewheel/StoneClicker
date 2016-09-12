@@ -27,9 +27,8 @@ import java.util.TreeMap;
  *         Created on 18.08.2016.
  *         <p>
  *         Class for store and representation big int values.
- *         // TODO: reneme this class and methods
  */
-public class StonesCounter {
+public class Counter {
     private static TreeMap<Integer, String> prefix;
     private BigDecimal counter;
 
@@ -46,15 +45,15 @@ public class StonesCounter {
         prefix.put(0, "");
     }
 
-    public StonesCounter(BigDecimal initialValue) {
+    public Counter(BigDecimal initialValue) {
         counter = new BigDecimal(initialValue.toString());
     }
 
-    public StonesCounter(int initialValue) {
+    public Counter(int initialValue) {
         counter = new BigDecimal(initialValue);
     }
 
-    public StonesCounter() {
+    public Counter() {
         counter = new BigDecimal("0");
     }
 
@@ -97,15 +96,15 @@ public class StonesCounter {
     /**
      * @return current value of stones counter as string.
      */
-    public String getStones() {
+    public String getValue() {
         return shortedValueOf(counter);
     }
 
-    public void addStones(BigDecimal stones) {
-        counter = counter.add(stones);
+    public void increaseValue(BigDecimal num) {
+        counter = counter.add(num);
     }
 
-    public void removeStones(BigDecimal stones) { counter = counter.subtract(stones); }
+    public void reduceValue(BigDecimal num) { counter = counter.subtract(num); }
 
     /**
      * Compare given value and counter value.

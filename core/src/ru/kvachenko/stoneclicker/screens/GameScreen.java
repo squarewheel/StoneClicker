@@ -34,13 +34,12 @@ import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import ru.kvachenko.stoneclicker.StoneClicker;
-import ru.kvachenko.stoneclicker.StonesCounter;
+import ru.kvachenko.stoneclicker.Counter;
 import ru.kvachenko.stoneclicker.Upgrade;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -70,15 +69,15 @@ public class GameScreen implements Screen {
             Label costLabel = new Label("", skin) {
                 @Override
                 public void act(float delta) {
-                    setText("Cost:\n" + StonesCounter.shortedValueOf(upgrade.getCost()));
+                    setText("Cost:\n" + Counter.shortedValueOf(upgrade.getCost()));
                     super.act(delta);
                 }
             };
             Label bonusesLabel = new Label("", skin, "upgradeLabel") {
                 @Override
                 public void act(float delta) {
-                    setText("Power: " + StonesCounter.shortedValueOf(upgrade.getPowerBonus()) +
-                     " SPS: " + StonesCounter.shortedValueOf(upgrade.getSPSBonus()));
+                    setText("Power: " + Counter.shortedValueOf(upgrade.getPowerBonus()) +
+                     " SPS: " + Counter.shortedValueOf(upgrade.getSPSBonus()));
                     super.act(delta);
                 }
             };
@@ -149,6 +148,7 @@ public class GameScreen implements Screen {
     private TextureAtlas images;
     private Skin skin;
     private Image stone;
+    private Image korovanImg;
     private Stage mainStage;
     private Stage uiStage;
     private Label stonesCounterLabel;
@@ -243,7 +243,7 @@ public class GameScreen implements Screen {
                     ));
 
                 // Each click adds stones
-                gameController.getScore().addStones(gameController.getClickPower().getCounter());
+                gameController.getScore().increaseValue(gameController.getClickPower().getCounter());
                 return super.touchDown(screenX, screenY, pointer, button);
             }
         };
@@ -252,6 +252,25 @@ public class GameScreen implements Screen {
         // Stone initialization
         stone = new Image(images.findRegion("stone"));
         mainStage.addActor(stone);
+
+        // Korovan initialization
+        korovanImg = new Image(images.findRegion("cow"));
+        korovanImg.addAction(Actions.fadeOut(0));
+        korovanImg.addListener(new InputListener() {
+            @Override
+            public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+                if (gameController.getKorovan().isActive()) {
+                    korovanImg.clearActions();
+                    korovanImg.addAction(Actions.fadeOut(0));
+                    gameController.resetKorovanTimer();
+                    gameController.getKorovan().takeBonus();
+                    gameController.getKorovan().setActive(false);
+                    return true;
+                }
+                return false;
+            }
+        });
+        uiStage.addActor(korovanImg);
 
         // Screen variables initialization
         screenWidth = mainStage.getViewport().getScreenWidth();
@@ -263,21 +282,21 @@ public class GameScreen implements Screen {
         stonesCounterLabel = new Label("--", skin) {
             @Override
             public void act(float delta) {
-                setText(gameController.getScore().getStones());
+                setText(gameController.getScore().getValue());
                 super.act(delta);
             }
         };
         stonesPerSecondLabel = new Label("--", skin) {
             @Override
             public void act(float delta) {
-                setText(gameController.getStonesPerSecond().getStones());
+                setText(gameController.getStonesPerSecond().getValue());
                 super.act(delta);
             }
         };
         clickPowerLabel = new Label("--", skin) {
             @Override
             public void act(float delta) {
-                setText(gameController.getClickPower().getStones());
+                setText(gameController.getClickPower().getValue());
                 super.act(delta);
             }
         };
@@ -426,12 +445,29 @@ public class GameScreen implements Screen {
         if (!messages.isEmpty()) {
             if (!messagesTable.hasActions()) {
                 messagesLabel.setText(messages.removeFirst());
+                messagesLabel.setAlignment(Align.center);
                 messagesTable.addAction(Actions.sequence(
                         Actions.fadeIn(1),
                         Actions.delay(4),
                         Actions.fadeOut(1)));
                 messagesTable.toFront();
             }
+        }
+
+        // Show korovanImg if it's necessary
+        float korovanTimer = gameController.getKorovanTimer();
+        if (korovanTimer > 0 && !korovanImg.hasActions()) {
+            korovanImg.toFront();
+            korovanImg.setPosition(
+                    MathUtils.random(0f, screenWidth),
+                    MathUtils.random(0f, screenHeight));
+            korovanImg.setPosition(
+                    MathUtils.clamp(korovanImg.getX(), 0, screenWidth - korovanImg.getWidth()),
+                    MathUtils.clamp(korovanImg.getY(), 0, screenHeight - korovanImg.getHeight()));
+            korovanImg.addAction(Actions.sequence(
+                    Actions.fadeIn(0.1f),
+                    Actions.delay(korovanTimer),
+                    Actions.fadeOut(0.4f)));
         }
 
         // Update game state
