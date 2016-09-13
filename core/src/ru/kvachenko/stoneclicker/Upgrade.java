@@ -98,7 +98,8 @@ public class Upgrade {
 
     void setAmount(int amount) {
         this.amount = amount;
-        if (this.amount > 0) currentCost = baseCost.multiply(costMultiplier.multiply(new BigDecimal(amount + 1)));
+        //if (this.amount > 0) currentCost = baseCost.multiply(costMultiplier.multiply(new BigDecimal(amount + 1)));
+        if (this.amount > 0) currentCost = baseCost.multiply(costMultiplier.pow(amount + 1));
     }
 
     public void buy(StoneClicker gameController) {
@@ -113,7 +114,8 @@ public class Upgrade {
     public void sell(StoneClicker gameController) {
         if (amount < 1) return;
 
-        BigDecimal moneyback = (amount == 1) ? baseCost : baseCost.multiply(costMultiplier.multiply(new BigDecimal(amount - 1)));
+        //BigDecimal moneyback = (amount == 1) ? baseCost : baseCost.multiply(costMultiplier.multiply(new BigDecimal(amount - 1)));
+        BigDecimal moneyback = (amount == 1) ? baseCost : baseCost.multiply(costMultiplier.pow(amount - 1));
 
         gameController.getScore().increaseValue(moneyback);
         gameController.getClickPower().reduceValue(powerBonus);

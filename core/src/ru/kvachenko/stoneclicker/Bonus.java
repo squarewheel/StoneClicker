@@ -41,7 +41,7 @@ public class Bonus {
     }
 
     public void takeBonus() {
-        BigDecimal randomValue = new BigDecimal(MathUtils.random(1000, 100000));
+        BigDecimal randomValue = new BigDecimal(MathUtils.random(100, 10000));
         bonusValue =  gameController.getClickPower().getCounter().multiply(randomValue);
         gameController.getScore().increaseValue(bonusValue);
         gameController.getMessagesList().addLast("Korovan Robbery" + "\n" + "Bonus " + Counter.shortedValueOf(bonusValue));
