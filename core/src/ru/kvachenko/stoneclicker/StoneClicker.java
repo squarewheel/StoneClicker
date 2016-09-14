@@ -107,7 +107,6 @@ public class StoneClicker extends Game {
         else if (korovanTimer > 0) korovanTimer -= Gdx.graphics.getDeltaTime();
         else if (korovan.isActive()) korovan.setActive(false);
 
-
         // Each second add stonesPerSecond value to score
         if (timeElapsed >= 1) {
             score.increaseValue(stonesPerSecond.getCounter());

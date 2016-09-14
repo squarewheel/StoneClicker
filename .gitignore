@@ -70,4 +70,6 @@ build/
 Thumbs.db
 
 ## App Specific
+stoneclicker.db
 save.json
+save.scs
