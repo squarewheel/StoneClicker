@@ -171,12 +171,15 @@ public class GameScreen implements Screen {
 
     public GameScreen(final StoneClicker gameController) {
         this.gameController = gameController;
-        images = new TextureAtlas(Gdx.files.internal("android/assets/images.atlas"));
+        //images = new TextureAtlas(Gdx.files.internal("android/assets/images.atlas"));
+        images = new TextureAtlas(Gdx.files.internal("images.atlas"));
 
         // Skin initialization
         skin = new Skin();
-        skin.add("default", new BitmapFont(Gdx.files.internal("android/assets/fonts/sansman24.fnt")));
-        skin.add("sansman16", new BitmapFont(Gdx.files.internal("android/assets/fonts/sansman16.fnt")));
+//        skin.add("default", new BitmapFont(Gdx.files.internal("android/assets/fonts/sansman24.fnt")));
+//        skin.add("sansman16", new BitmapFont(Gdx.files.internal("android/assets/fonts/sansman16.fnt")));
+        skin.add("default", new BitmapFont(Gdx.files.internal("fonts/sansman24.fnt")));
+        skin.add("sansman16", new BitmapFont(Gdx.files.internal("fonts/sansman16.fnt")));
         skin.add("default", new Label.LabelStyle(skin.getFont("default"), Color.GOLD));
         skin.add("upgradeLabel", new Label.LabelStyle(skin.getFont("sansman16"), Color.GOLD));
         skin.add("buttonUpImg", new NinePatch(images.findRegion("grey_button"), 10, 10, 10, 10));

@@ -37,7 +37,8 @@ public class DesktopDB extends DB {
     public DesktopDB(String DBName) {
         super(DBName);
 
-        String DBPath = "android/assets/database/";
+        //String DBPath = "android/assets/database/";
+        String DBPath = "database/";
         boolean newDB = true;
         // TODO: check db existing
         //FileHandle databaseFile = Gdx.files.local("android/assets/database/" + DBName + ".db");

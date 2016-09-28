@@ -41,7 +41,8 @@ public class LoadingScreen implements Screen {
 
     public LoadingScreen() {
         mainStage = new Stage(new ScreenViewport());
-        loadingImage = new Image(new Texture(Gdx.files.internal("android/assets/images/loading.png")));
+        //loadingImage = new Image(new Texture(Gdx.files.internal("android/assets/images/loading.png")));
+        loadingImage = new Image(new Texture(Gdx.files.internal("images/loading.png")));
         mainStage.addActor(loadingImage);
     }
 
