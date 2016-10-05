@@ -268,6 +268,7 @@ public class GameScreen implements Screen {
                     gameController.resetKorovanTimer();
                     gameController.getKorovan().takeBonus();
                     gameController.getKorovan().setActive(false);
+                    korovanImg.toBack();
                     return true;
                 }
                 return false;
@@ -467,6 +468,7 @@ public class GameScreen implements Screen {
             korovanImg.setPosition(
                     MathUtils.clamp(korovanImg.getX(), 0, screenWidth - korovanImg.getWidth()),
                     MathUtils.clamp(korovanImg.getY(), 0, screenHeight - korovanImg.getHeight()));
+
             korovanImg.addAction(Actions.sequence(
                     Actions.fadeIn(0.1f),
                     Actions.delay(korovanTimer),
