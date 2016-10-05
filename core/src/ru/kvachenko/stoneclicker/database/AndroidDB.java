@@ -22,11 +22,6 @@ package ru.kvachenko.stoneclicker.database;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
-import sun.misc.IOUtils;
-import sun.security.tools.policytool.Resources_es;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,7 +51,6 @@ public class AndroidDB extends DB {
             stmt = db;
             String sqlQuery = "";
             InputStreamReader is;
-            // TODO: load db from dump
             //FileHandle sqlDump = Gdx.files.internal("database/stoneclicker.sql");
             //String sqlQuery = sqlDump.readString();
             //stmt.execSQL(Gdx.files.internal("database/stoneclicker.sql").readString());

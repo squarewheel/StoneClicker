@@ -1,0 +1,4 @@
+CREATE TABLE upgrades (id INTEGER (0, 0) PRIMARY KEY NOT NULL, name TEXT NOT NULL, description TEXT, base_cost INTEGER (0, 0) NOT NULL, click_power_bonus INTEGER NOT NULL, stones_per_second_bonus INTEGER NOT NULL);
+INSERT INTO upgrades (id, name, description, base_cost, click_power_bonus, stones_per_second_bonus) VALUES (1, 'Dwarfs', NULL, 15, 1, 1);
+INSERT INTO upgrades (id, name, description, base_cost, click_power_bonus, stones_per_second_bonus) VALUES (2, 'Trolls', NULL, 100, 5, 3);
+INSERT INTO upgrades (id, name, description, base_cost, click_power_bonus, stones_per_second_bonus) VALUES (3, 'Bagger-288', NULL, 1000000, 100, 1000);

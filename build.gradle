@@ -16,7 +16,7 @@ allprojects {
     version = '1.0'
     ext {
         appName = "StoneClicker"
-        gdxVersion = '1.9.3'
+        gdxVersion = '1.9.4'
         roboVMVersion = '2.1.0'
         box2DLightsVersion = '1.4'
         ashleyVersion = '1.7.0'
@@ -74,6 +74,7 @@ project(":core") {
         compile "com.badlogicgames.gdx:gdx:$gdxVersion"
         compile "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
         compile group: 'org.xerial', name: 'sqlite-jdbc', version: '3.8.11.2'
+        compile files('C:\\Program Files (x86)\\Android\\android-sdk\\platforms\\android-21\\android.jar')
     }
 }
 
