@@ -42,7 +42,6 @@ public class DesktopDB extends DB {
         boolean newDB = true;
         // TODO: check db existing
         //FileHandle databaseFile = Gdx.files.local("android/assets/database/" + DBName + ".db");
-        //FileHandle databaseFile = Gdx.files.local(DBName + ".db");
         //if (databaseFile.exists()) newDB = false;
 
         try {
@@ -59,7 +58,10 @@ public class DesktopDB extends DB {
             e.printStackTrace();
         }
 
-        if (newDB) onCreate();
+        if (newDB) {
+            System.out.println("db db db");
+            // TODO: restore DB from dump
+        }
     }
 
     @Override

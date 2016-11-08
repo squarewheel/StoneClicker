@@ -37,7 +37,4 @@ public interface Result {
 
     public int getInt(int columnIndex);
 
-    //public int getAffectedRows();
-
-
 }

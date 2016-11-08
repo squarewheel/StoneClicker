@@ -35,17 +35,6 @@ public class DesktopResult implements Result {
         result = r;
     }
 
-//    @Override
-//    public int getAffectedRows() {
-//        try {
-//            return result.getRow();
-//        }
-//        catch (SQLException e) {
-//            e.printStackTrace();
-//            return -1;
-//        }
-//    }
-
     /**
      *  Moves the cursor froward one row from its current position.
      *  @return true if the new current row is valid; false if there are no more rows or error occur.

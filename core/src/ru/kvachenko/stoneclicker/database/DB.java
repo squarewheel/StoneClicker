@@ -33,9 +33,5 @@ public abstract class DB {
         this.dataBaseName = dataBaseName;
     }
 
-    public void onCreate() {
-        // TODO: load db dump
-    }
-
     public abstract Result query(String sql);
 }

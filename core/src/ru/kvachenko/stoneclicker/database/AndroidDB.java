@@ -43,7 +43,6 @@ public class AndroidDB extends DB {
         public DBConnection(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
             super(context, name, factory, version);
             //Gdx.app.log("DB", "Connection created.");
-            System.out.println("HELLO.");
         }
 
         @Override
@@ -69,18 +68,11 @@ public class AndroidDB extends DB {
             catch (IOException e) {
                 e.printStackTrace();
             }
-
-            //System.out.println(sqlQuery);
-
-            //stmt.execSQL(sqlDump.readString());
-            //stmt.execSQL(sqlQuery);
-
-            System.out.println("created db: " + stmt.getPath());
         }
 
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-            System.out.println("upgrade");
+            //System.out.println("upgrade");
             stmt = db;
         }
     }
@@ -90,8 +82,6 @@ public class AndroidDB extends DB {
         this.context = context;
         connection = new DBConnection(context, this.dataBaseName + ".db", null, 1);
         stmt = connection.getWritableDatabase();
-
-        System.out.println("writable db: " + stmt.getPath());
     }
 
     @Override
